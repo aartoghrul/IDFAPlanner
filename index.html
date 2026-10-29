@@ -465,11 +465,9 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
         <label for="fName">Title</label>
         <div class="quick-add"><input type="text" id="fName" autocomplete="off"><button class="btn" type="submit">Rename</button></div>
       </form>
-      <form class="field edit-only" id="fLinks" novalidate>
-        <label for="fIdfa">IDFA page</label>
-        <input type="url" id="fIdfa" placeholder="https://www.idfa.nl/…" autocomplete="off">
-        <label for="fTrailer">Trailer</label>
-        <div class="quick-add"><input type="url" id="fTrailer" placeholder="e.g. a YouTube or Vimeo link" autocomplete="off"><button class="btn" type="submit">Save links</button></div>
+      <form class="edit-only" id="fLinks" novalidate style="display:flex;flex-direction:column;gap:14px">
+        <div class="field"><label for="fIdfa">IDFA page</label><input type="url" id="fIdfa" placeholder="https://www.idfa.nl/…" autocomplete="off"></div>
+        <div class="field"><label for="fTrailer">Trailer</label><input type="url" id="fTrailer" placeholder="e.g. a YouTube or Vimeo link" autocomplete="off"></div>
         <div class="err" id="fLinksErr" hidden></div>
       </form>
       <div class="field">
@@ -480,7 +478,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     </div>
     <div class="dlg-foot edit-only">
       <div id="fDelWrap"><button class="btn danger" type="button" id="fDel">Remove film</button></div>
-      <button class="btn primary" type="button" data-close>Done</button>
+      <button class="btn primary" type="button" id="fDone">Done</button>
     </div>
   </div>
 </dialog>
@@ -888,15 +886,20 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     write(`films/${id}`, () => db.doc(`films/${id}`).update({ title }));
     render(); toast("Film renamed");
   });
-  $("fLinks").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const id = openFilmId, f = state.films.get(id); if (!f || !db) return;
+  // Links are saved whenever the film dialog closes. Done (or Enter in a link box) stays open on a bad link.
+  function finishFilm() {
     const links = readLinks("fIdfa", "fTrailer");
     if (typeof links === "string") { $("fLinksErr").textContent = links; $("fLinksErr").hidden = false; return; }
-    $("fLinksErr").hidden = true;
+    $("dlgFilm").close();
+  }
+  $("fDone").addEventListener("click", finishFilm);
+  $("fLinks").addEventListener("submit", (e) => { e.preventDefault(); finishFilm(); });
+  $("dlgFilm").addEventListener("close", () => {
+    const id = openFilmId, f = state.films.get(id); if (!f || !db || canWrite === false) return;
+    const links = readLinks("fIdfa", "fTrailer");
+    if (typeof links === "string") { toast(`Link not saved. ${links}`); return; }
     const patch = {};
     for (const [k] of LINKS) if (links[k] !== (f[k] || "")) patch[k] = links[k] || firebase.firestore.FieldValue.delete();
-    $("fIdfa").value = links.idfaUrl; $("fTrailer").value = links.trailerUrl;
     if (!Object.keys(patch).length) return;
     const next = { ...f }; for (const [k] of LINKS) { if (links[k]) next[k] = links[k]; else delete next[k]; }
     state.films.set(id, next);
