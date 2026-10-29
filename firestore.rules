@@ -1,0 +1,46 @@
+rules_version = '2';
+
+// Only someone signed in as the shared group account (i.e. who knows the
+// password) can read or edit the plan. The email must match SHARED_EMAIL in
+// index.html. These rules also only allow the shapes the page writes, so the
+// database can't be used to store anything else.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function member() {
+      return request.auth != null
+        && request.auth.token.email == "plan@idfaplanner.firebaseapp.com";
+    }
+
+    match /people/{id} {
+      allow read, delete: if member();
+      allow create, update: if member()
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 60
+        && request.resource.data.color is string
+        && request.resource.data.color.matches('^#[0-9a-fA-F]{6}$');
+    }
+
+    match /films/{id} {
+      allow read, delete: if member();
+      allow create, update: if member()
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200;
+    }
+
+    match /screenings/{id} {
+      allow read, delete: if member();
+      allow create, update: if member()
+        && request.resource.data.filmId is string
+        && request.resource.data.date is string
+        && request.resource.data.date.matches('^2026-11-(1[2-9]|2[0-2])$')
+        && request.resource.data.time is string
+        && request.resource.data.time.size() <= 5
+        && request.resource.data.attendees is map
+        && request.resource.data.attendees.size() <= 60;
+    }
+
+  }
+}

@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Our IDFA 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: festival programme grid — films down the side, the 11 festival days across, people as colored tags in each screening */
+:root {
+  --bg: #eef0f5;
+  --surface: #ffffff;
+  --surface-2: #f6f7fa;
+  --weekend: #e6e9f2;
+  --ink: #14162a;
+  --ink-2: #4b5068;
+  --ink-3: #8a8fa6;
+  --line: #d9dce6;
+  --line-2: #c4c8d6;
+  --accent: #2c3dd6;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3e6fb;
+  --danger: #c3283b;
+  --shadow: 0 1px 2px rgb(20 22 42 / .06), 0 4px 14px rgb(20 22 42 / .06);
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1120; --surface: #181b2e; --surface-2: #1d2136; --weekend: #141729;
+    --ink: #eceef8; --ink-2: #b2b6cc; --ink-3: #7b809a; --line: #2a2e46; --line-2: #3a3f5c;
+    --accent: #8796ff; --accent-ink: #0f1120; --accent-soft: #252b54; --danger: #ff6b7d;
+    --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 6px 18px rgb(0 0 0 / .25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1120; --surface: #181b2e; --surface-2: #1d2136; --weekend: #141729;
+  --ink: #eceef8; --ink-2: #b2b6cc; --ink-3: #7b809a; --line: #2a2e46; --line-2: #3a3f5c;
+  --accent: #8796ff; --accent-ink: #0f1120; --accent-soft: #252b54; --danger: #ff6b7d;
+  --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 6px 18px rgb(0 0 0 / .25);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1480px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+/* Header */
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.eyebrow .countdown { background: var(--ink); color: var(--bg); padding: 2px 8px; border-radius: 99px; letter-spacing: .04em; }
+h1 {
+  font-family: var(--font-display); font-stretch: 125%; font-weight: 800;
+  font-size: clamp(30px, 5vw, 52px); line-height: 1; letter-spacing: -.02em;
+  margin: 8px 0 0; text-wrap: balance;
+}
+h1 .yr { color: var(--accent); }
+.sub { margin: 8px 0 0; color: var(--ink-2); max-width: 60ch; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--line-2); background: var(--surface); border-radius: 99px;
+  padding: 8px 14px; font-weight: 600; font-size: 14px; white-space: nowrap;
+  transition: background .15s, border-color .15s;
+}
+.btn:hover { border-color: var(--ink-3); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { border-color: transparent; background: transparent; }
+.btn.ghost:hover { background: var(--surface-2); }
+.btn.danger { color: var(--danger); border-color: transparent; background: transparent; }
+.btn.danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); }
+.btn.danger-solid { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Toolbar */
+.toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+}
+.crew { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.crew-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-right: 4px; }
+.crew-chip {
+  display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--surface);
+  border-radius: 99px; padding: 4px 10px 4px 5px; font-size: 13px; font-weight: 600;
+}
+.crew-chip .dot { width: 18px; height: 18px; border-radius: 50%; background: var(--c); flex: none; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: var(--on); }
+.crew-chip .count { display: inline-flex; gap: 4px; align-items: center; font-family: var(--font-mono); font-weight: 500; font-size: 11px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.crew-chip .count i { font-style: normal; display: inline-flex; align-items: center; gap: 2px; padding: 1px 4px; border-radius: 4px; }
+.crew-chip .count .cb { background: var(--c); color: var(--on); }
+.crew-chip .count .cm { border: 1px dashed var(--c); }
+.crew-chip .count svg { width: 10px; height: 10px; }
+.crew-chip[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--surface)); }
+.crew-chip:hover { border-color: var(--c); }
+.legend { display: flex; gap: 14px; align-items: center; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
+.legend .tag { pointer-events: none; }
+
+/* Tags */
+.tag {
+  --c: #888; --on: #fff;
+  display: inline-flex; align-items: center; gap: 4px; max-width: 100%;
+  font-size: 12px; font-weight: 650; line-height: 1; padding: 4px 7px; border-radius: 5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tag.bought { background: var(--c); color: var(--on); border: 1.5px solid var(--c); }
+.tag.maybe {
+  background: color-mix(in srgb, var(--c) 12%, var(--surface));
+  color: color-mix(in srgb, var(--c) 72%, var(--ink));
+  border: 1.5px dashed var(--c);
+}
+.tag svg { width: 12px; height: 12px; flex: none; }
+.tag span { overflow: hidden; text-overflow: ellipsis; }
+
+/* Grid */
+.board {
+  overflow: auto; max-height: min(78vh, 900px);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+}
+table { border-collapse: separate; border-spacing: 0; min-width: 100%; }
+th, td { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th {
+  position: sticky; top: 0; z-index: 2; background: var(--surface);
+  padding: 10px 8px 8px; text-align: left; min-width: 128px; font-weight: 500;
+}
+thead th.wknd { background: color-mix(in srgb, var(--weekend) 70%, var(--surface)); }
+.day-dow { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.day-num { font-family: var(--font-display); font-stretch: 112%; font-weight: 750; font-size: 22px; line-height: 1.05; display: flex; align-items: baseline; gap: 5px; }
+.day-num small { font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--ink-3); letter-spacing: .04em; }
+.corner, .film {
+  position: sticky; left: 0; background: var(--surface);
+  width: 200px; min-width: 170px; max-width: 220px;
+}
+.corner { z-index: 3; vertical-align: bottom; font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.film { z-index: 1; padding: 0; box-shadow: 1px 0 0 var(--line); }
+.film button {
+  display: block; width: 100%; height: 100%; min-height: 76px; text-align: left; background: none; border: 0;
+  padding: 10px 12px; border-radius: 0;
+}
+.film button:hover { background: var(--surface-2); }
+.film-title { font-weight: 700; font-size: 14.5px; line-height: 1.25; text-wrap: balance; overflow-wrap: anywhere; }
+.film-meta { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); margin-top: 4px; }
+td.cell { padding: 6px; min-width: 128px; position: relative; }
+td.cell.wknd { background: color-mix(in srgb, var(--weekend) 55%, transparent); }
+.cell-stack { display: flex; flex-direction: column; gap: 6px; min-height: 64px; }
+.screening {
+  display: flex; flex-direction: column; gap: 6px; text-align: left; width: 100%;
+  background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r);
+  padding: 4px 6px 6px; box-shadow: 0 1px 0 var(--line);
+  transition: border-color .12s, opacity .15s;
+}
+.screening:hover { border-color: var(--ink-3); }
+.screening.dim { opacity: .28; }
+.s-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
+  background: none; border: 0; padding: 3px 2px; border-radius: 5px; text-align: left; width: 100%;
+}
+.s-head:hover .s-time { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+button.tag { cursor: pointer; font-family: inherit; }
+button.tag:hover { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--c); }
+.s-add {
+  border: 1px dashed var(--line-2); background: none; border-radius: 5px; color: var(--ink-3);
+  font-size: 11.5px; font-weight: 600; padding: 4px 6px; text-align: left;
+}
+.s-add:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Popover */
+.pop {
+  position: fixed; z-index: 40; width: min(280px, calc(100vw - 32px));
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); border-radius: 12px;
+  box-shadow: 0 14px 40px rgb(0 0 0 / .22); padding: 10px; display: flex; flex-direction: column; gap: 8px;
+}
+.pop-h { font-size: 12px; font-weight: 650; color: var(--ink-2); padding: 2px 4px; }
+.pop-h b { color: var(--ink); }
+.pop-list { display: flex; flex-direction: column; max-height: 260px; overflow: auto; }
+.pop-row { display: flex; align-items: center; gap: 8px; padding: 5px 4px; border-radius: 7px; }
+.pop-row:hover { background: var(--surface-2); }
+.pop-row .who-name { min-width: 0; font-size: 14px; }
+.pop-row .mini { border: 1px solid var(--line-2); background: var(--surface); border-radius: 6px; padding: 3px 7px; font-size: 12px; font-weight: 600; color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px; }
+.pop-row .mini svg { width: 11px; height: 11px; }
+.pop-row .mini:hover { border-color: var(--c); color: var(--ink); }
+.pop .quick-add input { padding: 6px 9px; font-size: 14px; }
+.pop .quick-add .btn { padding: 6px 12px; }
+.pop .seg { width: 100%; }
+.pop .seg button { flex: 1; justify-content: center; padding: 8px; }
+.pop-link { background: none; border: 0; text-align: left; font-size: 13px; font-weight: 600; padding: 6px 4px; border-radius: 6px; color: var(--ink-2); }
+.pop-link:hover { background: var(--surface-2); color: var(--ink); }
+.pop-link.danger { color: var(--danger); }
+.s-time { font-family: var(--font-mono); font-weight: 600; font-size: 13px; font-variant-numeric: tabular-nums; }
+.s-venue { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.s-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.s-empty { font-size: 11.5px; color: var(--ink-3); font-style: italic; }
+
+.empty-row td { padding: 40px 20px; text-align: center; color: var(--ink-2); border-right: 0; }
+.empty-row .big { font-family: var(--font-display); font-stretch: 112%; font-weight: 700; font-size: 20px; color: var(--ink); margin-bottom: 6px; }
+.empty-row .btn { margin-top: 14px; }
+.empty-sticky { position: sticky; left: 0; max-width: min(92vw, 520px); margin: 0 auto; }
+
+.banner { border: 1px solid var(--line-2); background: var(--surface-2); border-radius: 10px; padding: 10px 14px; font-size: 14px; color: var(--ink-2); }
+.foot { font-size: 12.5px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.foot .link { border: 0; background: none; padding: 0; color: inherit; text-decoration: underline; font-size: inherit; }
+
+/* Password screen */
+.lock { max-width: 380px; margin: 12vh auto 0; display: flex; flex-direction: column; gap: 18px; }
+.lock form { display: flex; flex-direction: column; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; box-shadow: var(--shadow); }
+.lock .btn { justify-content: center; }
+
+/* Dialogs */
+dialog {
+  border: 0; padding: 0; border-radius: 16px; background: var(--surface); color: var(--ink);
+  width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 48px);
+  box-shadow: 0 24px 60px rgb(0 0 0 / .28);
+}
+dialog::backdrop { background: rgb(12 14 30 / .45); }
+.dlg { display: flex; flex-direction: column; max-height: calc(100vh - 48px); }
+.dlg-head { padding: 18px 20px 12px; display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; border-bottom: 1px solid var(--line); }
+.dlg-head h2 { margin: 0; font-family: var(--font-display); font-stretch: 112%; font-weight: 750; font-size: 21px; line-height: 1.15; text-wrap: balance; overflow-wrap: anywhere; }
+.dlg-head .kicker { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+.x { border: 0; background: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none; color: var(--ink-2); }
+.x:hover { background: var(--surface-2); }
+.dlg-body { padding: 16px 20px; overflow: auto; display: flex; flex-direction: column; gap: 18px; }
+.dlg-foot { padding: 12px 20px 16px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label, .field > .lbl { font-size: 12px; font-weight: 650; color: var(--ink-2); letter-spacing: .02em; }
+.field .hint { font-size: 12px; color: var(--ink-3); }
+.row2 { display: grid; grid-template-columns: 140px 1fr; gap: 12px; }
+@media (max-width: 440px) { .row2 { grid-template-columns: 1fr; } }
+input[type="text"], input[type="time"], input[type="password"] {
+  width: 100%; border: 1px solid var(--line-2); background: var(--surface-2); border-radius: 8px; padding: 9px 11px; font-size: 15px;
+}
+input[type="time"] { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+.days { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; }
+.days label { position: relative; }
+.days input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.days span {
+  display: flex; flex-direction: column; align-items: center; padding: 6px 2px; border: 1px solid var(--line-2);
+  border-radius: 8px; background: var(--surface); line-height: 1.1;
+}
+.days span b { font-family: var(--font-display); font-weight: 750; font-size: 17px; font-stretch: 110%; }
+.days span i { font-style: normal; font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.days input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.days input:checked + span i { color: inherit; opacity: .8; }
+.days input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.err { color: var(--danger); font-size: 13px; }
+
+.section-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.section-h h3 { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.section-h small { color: var(--ink-3); font-size: 12px; }
+.who { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.who-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.who-row:last-child { border-bottom: 0; }
+.who-name { display: flex; align-items: center; gap: 8px; font-weight: 650; flex: 1; min-width: 100px; overflow-wrap: anywhere; }
+.swatch { width: 14px; height: 14px; border-radius: 50%; background: var(--c); flex: none; }
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; background: var(--surface-2); }
+.seg button { border: 0; background: none; padding: 6px 10px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); display: inline-flex; align-items: center; gap: 5px; }
+.seg button + button { border-left: 1px solid var(--line-2); }
+.seg button[aria-pressed="true"].s-none { background: var(--surface); color: var(--ink); }
+.seg button[aria-pressed="true"].s-maybe { background: color-mix(in srgb, var(--c) 16%, var(--surface)); color: color-mix(in srgb, var(--c) 70%, var(--ink)); box-shadow: inset 0 0 0 1.5px var(--c); }
+.seg button[aria-pressed="true"].s-bought { background: var(--c); color: var(--on); }
+.seg svg { width: 13px; height: 13px; }
+.quick-add { display: flex; gap: 8px; }
+.quick-add input { flex: 1; min-width: 0; }
+.colors { display: flex; flex-wrap: wrap; gap: 8px; }
+.colors button { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; background: var(--c); box-shadow: inset 0 0 0 2px var(--surface); }
+.colors button[aria-pressed="true"] { border-color: var(--ink); }
+.colors.small button { width: 20px; height: 20px; box-shadow: inset 0 0 0 1.5px var(--surface); }
+.list-screenings { display: flex; flex-direction: column; gap: 6px; }
+.list-screenings button { display: flex; justify-content: space-between; gap: 10px; align-items: center; text-align: left; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); padding: 8px 10px; }
+.list-screenings button:hover { border-color: var(--accent); }
+.list-screenings .when { font-family: var(--font-mono); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.list-screenings .ppl { font-size: 12px; color: var(--ink-3); }
+.confirm { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; color: var(--danger); }
+.swatch-btn {
+  width: 26px; height: 26px; border-radius: 50%; flex: none; border: 0; background: var(--c);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--line-2); position: relative;
+}
+.swatch-btn:hover, .swatch-btn[aria-expanded="true"] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--c); }
+.p-list { display: flex; flex-direction: column; }
+.p-item { padding: 6px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.p-item:last-child { border-bottom: 0; }
+.p-row { display: flex; align-items: center; gap: 10px; }
+.p-row input[type="text"] {
+  flex: 1; min-width: 0; border-color: transparent; background: transparent; padding: 6px 8px; font-weight: 600;
+}
+.p-row input[type="text"]:hover { border-color: var(--line); }
+.icon-btn { width: 32px; height: 32px; border-radius: 8px; border: 0; background: none; color: var(--ink-3); display: grid; place-items: center; flex: none; }
+.icon-btn:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); color: var(--danger); }
+.icon-btn svg { width: 16px; height: 16px; }
+.palette { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; background: var(--surface-2); border-radius: 10px; }
+.palette button { width: 22px; height: 22px; border-radius: 50%; border: 0; background: var(--c); }
+.palette button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--surface-2), 0 0 0 3.5px var(--ink); }
+
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 99px; font-size: 14px; font-weight: 600;
+  box-shadow: var(--shadow); z-index: 50; max-width: calc(100vw - 32px);
+}
+@media (max-width: 600px) {
+  .corner, .film { width: 124px; min-width: 116px; }
+  .film button { padding: 8px 9px; }
+  .film-title { font-size: 13.5px; }
+  thead th, td.cell { min-width: 116px; }
+}
+.ro .edit-only { display: none !important; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<div class="lock" id="lock" hidden>
+  <div>
+    <div class="eyebrow"><span>IDFA · Amsterdam · 12–22 Nov</span></div>
+    <h1>Our IDFA <span class="yr">2026</span></h1>
+  </div>
+  <form id="formLock">
+    <div class="field">
+      <label for="lockPw">Password</label>
+      <input type="password" id="lockPw" autocomplete="current-password" required>
+    </div>
+    <div class="err" id="lockErr" hidden></div>
+    <button class="btn primary" type="submit" id="lockGo">Open the plan</button>
+  </form>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <header>
+    <div>
+      <div class="eyebrow"><span>IDFA · Amsterdam · 12–22 Nov</span><span class="countdown" id="countdown"></span></div>
+      <h1>Our IDFA <span class="yr">2026</span></h1>
+      <p class="sub">Who's seeing what, and when. Add a screening you've spotted in the programme, then use + participant to say who's going. Tap a name to switch between thinking and bought.</p>
+    </div>
+    <div class="actions edit-only">
+      <button class="btn" id="btnPeople" type="button">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="5.5" r="2.5"/><path d="M1.5 13.5c.6-2.4 2.4-3.6 4.5-3.6s3.9 1.2 4.5 3.6"/><path d="M11 3.5a2.3 2.3 0 0 1 0 4.4M12.2 10.2c1.2.5 2 1.6 2.3 3.3"/></svg>
+        People
+      </button>
+      <button class="btn primary" id="btnAdd" type="button">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>
+        Add screening
+      </button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <div class="toolbar">
+    <div class="crew" id="crew"><span class="crew-label">People</span></div>
+    <div class="legend">
+      <span class="tag bought" style="--c:var(--ink-2);--on:var(--surface)"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h7A1.5 1.5 0 0 1 11 3.5v1a1.5 1.5 0 0 0 0 3v1A1.5 1.5 0 0 1 9.5 10h-7A1.5 1.5 0 0 1 1 8.5v-1a1.5 1.5 0 0 0 0-3z"/></svg><span>Has ticket</span></span>
+      <span class="tag maybe" style="--c:var(--ink-3)"><span>Thinking about it</span></span>
+    </div>
+  </div>
+
+  <div class="board" id="board" aria-label="Screenings by film and day"></div>
+
+  <div class="foot">
+    <span>Everyone with the password sees the same plan, live.</span>
+    <span>Click a person above to highlight their screenings.</span>
+    <button type="button" class="link" id="btnLock">Lock this device</button>
+  </div>
+</div>
+
+<!-- Add screening -->
+<dialog id="dlgAdd" aria-labelledby="addTitle">
+  <form class="dlg" id="formAdd" novalidate>
+    <div class="dlg-head">
+      <div><div class="kicker">New screening</div><h2 id="addTitle">Add a film to the plan</h2></div>
+      <button class="x" type="button" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+    </div>
+    <div class="dlg-body">
+      <div class="field">
+        <label for="addFilm">Film</label>
+        <input type="text" id="addFilm" list="filmList" autocomplete="off" placeholder="e.g. The Last Lighthouse Keeper">
+        <datalist id="filmList"></datalist>
+        <span class="hint">Pick an existing film to add another screening of it.</span>
+      </div>
+      <div class="field">
+        <span class="lbl" id="addDayLbl">Day</span>
+        <div class="days" id="addDays" role="radiogroup" aria-labelledby="addDayLbl"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="addTime">Starts at</label><input type="time" id="addTime" value="19:30" step="300"></div>
+        <div class="field"><label for="addVenue">Venue <span style="font-weight:400;color:var(--ink-3)">(optional)</span></label><input type="text" id="addVenue" placeholder="e.g. Tuschinski 1" autocomplete="off"></div>
+      </div>
+      <div class="err" id="addErr" hidden></div>
+    </div>
+    <div class="dlg-foot">
+      <span style="font-size:12.5px;color:var(--ink-3)">Next, you'll pick who's going.</span>
+      <div class="actions"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary" type="submit">Add screening</button></div>
+    </div>
+  </form>
+</dialog>
+
+<!-- Screening detail -->
+<dialog id="dlgScreening" aria-labelledby="sTitle">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div><div class="kicker" id="sKicker"></div><h2 id="sTitle"></h2></div>
+      <button class="x" type="button" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+    </div>
+    <div class="dlg-body">
+      <div class="field">
+        <div class="section-h"><h3>Who's going</h3><small id="sCount"></small></div>
+        <div class="who" id="sWho"></div>
+        <form class="quick-add edit-only" id="sQuick">
+          <input type="text" id="sQuickName" placeholder="Add a person…" autocomplete="off" aria-label="New person's name">
+          <button class="btn" type="submit">Add</button>
+        </form>
+      </div>
+      <details class="edit-only" id="sDetails">
+        <summary style="cursor:pointer;font-size:13px;font-weight:650;color:var(--ink-2)">Change day, time or venue</summary>
+        <form id="sEdit" style="display:flex;flex-direction:column;gap:14px;margin-top:12px">
+          <div class="days" id="sDays" role="radiogroup" aria-label="Day"></div>
+          <div class="row2">
+            <div class="field"><label for="sTime">Starts at</label><input type="time" id="sTime" step="300"></div>
+            <div class="field"><label for="sVenue">Venue</label><input type="text" id="sVenue" autocomplete="off"></div>
+          </div>
+          <div><button class="btn" type="submit">Save changes</button></div>
+        </form>
+      </details>
+    </div>
+    <div class="dlg-foot edit-only">
+      <div id="sDelWrap"><button class="btn danger" type="button" id="sDel">Remove screening</button></div>
+      <button class="btn primary" type="button" data-close>Done</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Film detail -->
+<dialog id="dlgFilm" aria-labelledby="fTitle">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div><div class="kicker">Film</div><h2 id="fTitle"></h2></div>
+      <button class="x" type="button" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+    </div>
+    <div class="dlg-body">
+      <form class="field edit-only" id="fRename">
+        <label for="fName">Title</label>
+        <div class="quick-add"><input type="text" id="fName" autocomplete="off"><button class="btn" type="submit">Rename</button></div>
+      </form>
+      <div class="field">
+        <div class="section-h"><h3>Screenings</h3><small id="fCount"></small></div>
+        <div class="list-screenings" id="fList"></div>
+        <div class="edit-only"><button class="btn" type="button" id="fAddScreening">+ Another screening of this film</button></div>
+      </div>
+    </div>
+    <div class="dlg-foot edit-only">
+      <div id="fDelWrap"><button class="btn danger" type="button" id="fDel">Remove film</button></div>
+      <button class="btn primary" type="button" data-close>Done</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- People -->
+<dialog id="dlgPeople" aria-labelledby="pTitle">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div><div class="kicker">Who's in the plan</div><h2 id="pTitle">People</h2></div>
+      <button class="x" type="button" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+    </div>
+    <div class="dlg-body">
+      <form class="field" id="pAdd">
+        <label for="pName">Add someone</label>
+        <div class="quick-add" style="align-items:center">
+          <button type="button" class="swatch-btn" id="pNewColor" aria-label="Choose a color" aria-expanded="false"></button>
+          <input type="text" id="pName" placeholder="Name" autocomplete="off">
+          <button class="btn primary" type="submit">Add</button>
+        </div>
+        <div class="palette" id="pColors" hidden></div>
+      </form>
+      <div class="field">
+        <div class="section-h"><h3>Everyone</h3><small id="pCount"></small></div>
+        <div class="p-list" id="pList"></div>
+        <span class="hint">Tap a color dot to change it. Tap a name to rename.</span>
+      </div>
+    </div>
+    <div class="dlg-foot"><span></span><button class="btn primary" type="button" data-close>Done</button></div>
+  </div>
+</dialog>
+
+<div class="pop" id="pop" role="dialog" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  // ---------- constants ----------
+  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const DAYS = [];
+  for (let d = 12; d <= 22; d++) {
+    const dt = new Date(2026, 10, d);
+    DAYS.push({ key: `2026-11-${d}`, d, dow: DOW[dt.getDay()], wknd: dt.getDay() === 0 || dt.getDay() === 6 });
+  }
+  const PALETTE = ["#e0413a","#f08a24","#e3b505","#3a9d4a","#14a098","#2f74e0","#6b4fd8","#c93b8f","#8a5a3c","#55607a","#9ab61e","#00a6d6"];
+  const TICKET = '<svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h7A1.5 1.5 0 0 1 11 3.5v1a1.5 1.5 0 0 0 0 3v1A1.5 1.5 0 0 1 9.5 10h-7A1.5 1.5 0 0 1 1 8.5v-1a1.5 1.5 0 0 0 0-3z"/></svg>';
+
+  // ---------- state ----------
+  const state = { people: new Map(), films: new Map(), screenings: new Map(), focus: null, ready: false };
+  let db = null, canWrite = true;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  const onColor = (hex) => {
+    const n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return (0.299 * r + 0.587 * g + 0.114 * b) > 165 ? "#14162a" : "#ffffff";
+  };
+  const pvars = (p) => `--c:${p.color};--on:${onColor(p.color)}`;
+  const initials = (n) => (n || "?").trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+  const dayOf = (key) => DAYS.find((x) => x.key === key);
+  const dayLabel = (key) => { const x = dayOf(key); return x ? `${x.dow} ${x.d} Nov` : key; };
+  const sortedPeople = () => [...state.people.values()].sort((a, b) => (a.created || 0) - (b.created || 0));
+  const attendees = (s) => Object.entries(s.attendees || {}).filter(([pid, v]) => (v === "bought" || v === "maybe") && state.people.has(pid));
+
+  // ---------- toast ----------
+  let toastT;
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
+
+  // ---------- writes (one at a time per doc) ----------
+  const queues = new Map();
+  function write(path, fn) {
+    const prev = queues.get(path) || Promise.resolve();
+    const next = prev.then(fn).catch((e) => {
+      if (e && e.code === "permission-denied") toast("The database refused that change. Check the Firestore rules.");
+      else if (e && e.code === "quota_exceeded") toast("The plan is full. Remove some old entries first.");
+      else toast("Couldn't save that. Check your connection and try again.");
+      console.warn(e);
+    });
+    queues.set(path, next);
+    return next;
+  }
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  // ---------- countdown ----------
+  (function countdown() {
+    const now = new Date(); const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const start = new Date(2026, 10, 12), end = new Date(2026, 10, 22);
+    const diff = Math.round((start - today) / 86400000);
+    let txt;
+    if (diff > 1) txt = `Starts in ${diff} days`;
+    else if (diff === 1) txt = "Starts tomorrow";
+    else if (today <= end) txt = `Day ${Math.round((today - start) / 86400000) + 1} of 11`;
+    else txt = "That's a wrap";
+    $("countdown").textContent = txt;
+  })();
+
+  // ---------- render: crew ----------
+  function renderCrew() {
+    const el = $("crew");
+    const people = sortedPeople();
+    let html = '<span class="crew-label">People</span>';
+    if (!people.length) html += `<span style="font-size:13px;color:var(--ink-3)">${state.ready ? "Nobody yet." : "Loading…"}</span>`;
+    for (const p of people) {
+      html += `<button type="button" class="crew-chip" data-person="${esc(p.id)}" aria-pressed="${state.focus === p.id}" style="${pvars(p)}" title="Highlight ${esc(p.name)}'s screenings">
+        <span class="dot">${esc(initials(p.name))}</span>${esc(p.name)}</button>`;
+    }
+    if (canWrite !== false) html += `<button type="button" class="btn ghost edit-only" id="crewAdd" style="padding:4px 10px;font-size:13px">+ Add person</button>`;
+    el.innerHTML = html;
+  }
+
+  // ---------- render: board ----------
+  function tagHTML(p, status, sid) {
+    const label = `${esc(p.name)} · ${status === "bought" ? "has a ticket" : "thinking about it"}`;
+    const inner = `${status === "bought" ? TICKET : ""}<span>${esc(p.name)}</span>`;
+    if (canWrite === false || !sid) return `<span class="tag ${status}" style="${pvars(p)}" title="${label}">${inner}</span>`;
+    return `<button type="button" class="tag ${status}" style="${pvars(p)}" data-tag-s="${esc(sid)}" data-tag-p="${esc(p.id)}" title="${label}. Click to change">${inner}</button>`;
+  }
+  function filmOrder() {
+    const first = new Map();
+    for (const s of state.screenings.values()) {
+      const k = `${s.date} ${s.time}`;
+      if (!first.has(s.filmId) || k < first.get(s.filmId)) first.set(s.filmId, k);
+    }
+    return [...state.films.values()].sort((a, b) => {
+      const fa = first.get(a.id) || "~", fb = first.get(b.id) || "~";
+      return fa < fb ? -1 : fa > fb ? 1 : (a.title || "").localeCompare(b.title || "");
+    });
+  }
+  function renderBoard() {
+    const films = filmOrder();
+    let h = '<table><thead><tr><th class="corner">Film</th>';
+    for (const d of DAYS) h += `<th class="${d.wknd ? "wknd" : ""}"><div class="day-dow">${d.dow}</div><div class="day-num">${d.d}<small>NOV</small></div></th>`;
+    h += "</tr></thead><tbody>";
+    if (!films.length) {
+      h += `<tr class="empty-row"><td colspan="${DAYS.length + 1}"><div class="empty-sticky">
+        <div class="big">${state.ready ? "No films on the plan yet" : "Loading the plan…"}</div>
+        <div>Add a screening you've spotted in the IDFA programme, then tag who's going.</div>
+        ${canWrite !== false ? '<button class="btn primary edit-only" type="button" data-add>Add the first screening</button>' : ""}
+      </div></td></tr>`;
+    }
+    for (const f of films) {
+      const ss = [...state.screenings.values()].filter((s) => s.filmId === f.id);
+      const nGoing = new Set(ss.flatMap((s) => attendees(s).map(([pid]) => pid))).size;
+      h += `<tr><th class="film" scope="row"><button type="button" data-film="${esc(f.id)}" title="Edit film">
+        <div class="film-title">${esc(f.title)}</div>
+        <div class="film-meta">${ss.length} screening${ss.length === 1 ? "" : "s"} · ${nGoing} going</div></button></th>`;
+      for (const d of DAYS) {
+        const here = ss.filter((s) => s.date === d.key).sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+        h += `<td class="cell ${d.wknd ? "wknd" : ""}"><div class="cell-stack ${here.length ? "has" : ""}">`;
+        for (const s of here) {
+          const at = attendees(s).sort((a, b) => (a[1] === b[1] ? 0 : a[1] === "bought" ? -1 : 1));
+          const dim = state.focus && !(s.attendees || {})[state.focus] ? " dim" : "";
+          h += `<div class="screening${dim}">
+            <button type="button" class="s-head" data-screening="${esc(s.id)}" title="Screening details" aria-label="${esc(f.title)}, ${dayLabel(s.date)} at ${esc(s.time)}: details"><span class="s-time">${esc(s.time)}</span>${s.venue ? `<span class="s-venue">${esc(s.venue)}</span>` : ""}</button>
+            ${at.length ? `<div class="s-tags">${at.map(([pid, v]) => tagHTML(state.people.get(pid), v, s.id)).join("")}</div>` : (canWrite === false ? '<div class="s-empty">Nobody yet</div>' : "")}
+            ${canWrite !== false ? `<button type="button" class="s-add edit-only" data-addp="${esc(s.id)}">+ participant</button>` : ""}
+          </div>`;
+        }
+        h += "</div></td>";
+      }
+      h += "</tr>";
+    }
+    h += "</tbody></table>";
+    const board = $("board"); const sl = board.scrollLeft, st = board.scrollTop;
+    board.innerHTML = h; board.scrollLeft = sl; board.scrollTop = st;
+  }
+
+  function render() {
+    renderCrew(); renderBoard();
+    $("filmList").innerHTML = [...state.films.values()].map((f) => `<option value="${esc(f.title)}"></option>`).join("");
+    if ($("dlgScreening").open && openScreeningId) fillScreening(openScreeningId);
+    if ($("dlgFilm").open && openFilmId) fillFilm(openFilmId);
+    if ($("dlgPeople").open) fillPeople();
+  }
+
+  // ---------- day pickers ----------
+  function dayChips(container, name, selected) {
+    container.innerHTML = DAYS.map((d) => `<label><input type="radio" name="${name}" value="${d.key}" ${d.key === selected ? "checked" : ""}><span><i>${d.dow}</i><b>${d.d}</b></span></label>`).join("");
+  }
+  const pickedDay = (name) => (document.querySelector(`input[name="${name}"]:checked`) || {}).value;
+
+  // ---------- add screening ----------
+  function openAdd(filmId, dayKey) {
+    if (canWrite === false) return;
+    const f = filmId ? state.films.get(filmId) : null;
+    $("addFilm").value = f ? f.title : "";
+    $("addVenue").value = "";
+    $("addErr").hidden = true;
+    dayChips($("addDays"), "addDay", dayKey || "");
+    $("dlgAdd").showModal();
+    setTimeout(() => (f ? $("addTime") : $("addFilm")).focus(), 30);
+  }
+  $("formAdd").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = $("addFilm").value.trim(), date = pickedDay("addDay"), time = $("addTime").value, venue = $("addVenue").value.trim();
+    const err = !title ? "Give the film a title." : !date ? "Pick the day of the screening." : !time ? "Add the start time." : "";
+    if (err) { $("addErr").textContent = err; $("addErr").hidden = false; return; }
+    if (!db) { toast("The shared plan isn't connected, so this can't be saved."); return; }
+    let film = [...state.films.values()].find((f) => f.title.trim().toLowerCase() === title.toLowerCase());
+    let filmId = film && film.id;
+    if (!filmId) {
+      filmId = newId();
+      state.films.set(filmId, { id: filmId, title, created: Date.now() });
+      write(`films/${filmId}`, () => db.doc(`films/${filmId}`).set({ title, created: Date.now() }));
+    }
+    const sid = newId();
+    const doc = { filmId, date, time, venue, attendees: {}, created: Date.now() };
+    state.screenings.set(sid, { id: sid, ...doc });
+    write(`screenings/${sid}`, () => db.doc(`screenings/${sid}`).set(doc));
+    $("dlgAdd").close();
+    render();
+    openScreening(sid);
+  });
+
+  // ---------- screening dialog ----------
+  let openScreeningId = null;
+  function openScreening(id) { openScreeningId = id; $("sDetails").open = false; resetConfirm("sDelWrap", "sDel", "Remove screening"); fillScreening(id, true); if (!$("dlgScreening").open) $("dlgScreening").showModal(); }
+  function fillScreening(id, initial) {
+    const s = state.screenings.get(id);
+    if (!s) { $("dlgScreening").close(); return; }
+    const f = state.films.get(s.filmId);
+    $("sKicker").textContent = `${dayLabel(s.date)} · ${s.time}${s.venue ? " · " + s.venue : ""}`;
+    $("sTitle").textContent = f ? f.title : "Untitled film";
+    const people = sortedPeople();
+    const a = s.attendees || {};
+    const nb = people.filter((p) => a[p.id] === "bought").length, nm = people.filter((p) => a[p.id] === "maybe").length;
+    $("sCount").textContent = people.length ? `${nb} with tickets · ${nm} thinking` : "";
+    $("sWho").innerHTML = people.length ? people.map((p) => {
+      const v = a[p.id] === "bought" ? "bought" : a[p.id] === "maybe" ? "maybe" : "none";
+      const dis = canWrite === false ? "disabled" : "";
+      return `<div class="who-row" style="${pvars(p)}"><span class="who-name"><span class="swatch"></span>${esc(p.name)}</span>
+        <span class="seg" role="group" aria-label="${esc(p.name)}">
+          <button type="button" class="s-none" data-set="none" data-pid="${esc(p.id)}" aria-pressed="${v === "none"}" ${dis}>Not going</button>
+          <button type="button" class="s-maybe" data-set="maybe" data-pid="${esc(p.id)}" aria-pressed="${v === "maybe"}" ${dis}>Thinking</button>
+          <button type="button" class="s-bought" data-set="bought" data-pid="${esc(p.id)}" aria-pressed="${v === "bought"}" ${dis}>${TICKET}Bought</button>
+        </span></div>`;
+    }).join("") : '<div class="who-row" style="color:var(--ink-3);font-size:14px">No people added yet. Type a name below to add the first one.</div>';
+    if (initial) {
+      dayChips($("sDays"), "sDay", s.date);
+      $("sTime").value = s.time || ""; $("sVenue").value = s.venue || "";
+    }
+  }
+  // v: "bought" | "maybe" | "none"
+  function setAttendance(sid, pid, v) {
+    if (!db) return;
+    const s = state.screenings.get(sid); if (!s) return;
+    const val = v === "none" ? null : v;
+    state.screenings.set(sid, { ...s, attendees: { ...(s.attendees || {}), [pid]: val } });
+    render();
+    write(`screenings/${sid}`, () => db.doc(`screenings/${sid}`).update({ ['attendees.' + pid]: val === null ? firebase.firestore.FieldValue.delete() : val }));
+  }
+  $("sWho").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-set]"); if (!b || !openScreeningId) return;
+    setAttendance(openScreeningId, b.dataset.pid, b.dataset.set);
+  });
+  $("sQuick").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = $("sQuickName").value.trim(); if (!name || !db) return;
+    const pid = addPerson(name);
+    $("sQuickName").value = "";
+    setAttendance(openScreeningId, pid, "maybe");
+    toast(`${name} added as thinking about it`);
+  });
+
+  // ---------- popovers on the grid ----------
+  let popAnchor = null;
+  function showPop(anchor, html) {
+    const pop = $("pop");
+    pop.innerHTML = html; pop.hidden = false; popAnchor = anchor;
+    const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let left = Math.min(Math.max(16, r.left), vw - pw - 16);
+    let top = r.bottom + 6;
+    if (top + ph > vh - 12) top = Math.max(12, r.top - ph - 6);
+    pop.style.left = left + "px"; pop.style.top = top + "px";
+  }
+  function closePop() { $("pop").hidden = true; popAnchor = null; }
+  function screeningLabel(s) {
+    const f = state.films.get(s.filmId);
+    return `<b>${esc(f ? f.title : "Film")}</b> · ${dayLabel(s.date)}, ${esc(s.time)}`;
+  }
+  function openAddPop(sid, anchor) {
+    const s = state.screenings.get(sid); if (!s) return;
+    const a = s.attendees || {};
+    const free = sortedPeople().filter((p) => a[p.id] !== "bought" && a[p.id] !== "maybe");
+    showPop(anchor, `
+      <div class="pop-h">Add to ${screeningLabel(s)}</div>
+      ${free.length ? `<div class="pop-list">${free.map((p) => `
+        <div class="pop-row" style="${pvars(p)}">
+          <span class="who-name"><span class="swatch"></span>${esc(p.name)}</span>
+          <button type="button" class="mini" data-pop-set="maybe" data-pid="${esc(p.id)}" data-sid="${esc(sid)}">Thinking</button>
+          <button type="button" class="mini" data-pop-set="bought" data-pid="${esc(p.id)}" data-sid="${esc(sid)}">${TICKET}Bought</button>
+        </div>`).join("")}</div>` : `<div class="pop-h" style="font-weight:400">${state.people.size ? "Everyone's already on this one." : "No people yet. Add the first one:"}</div>`}
+      <form class="quick-add" data-pop-new="${esc(sid)}"><input type="text" id="popNewName" placeholder="Someone new…" autocomplete="off" aria-label="New person's name"><button class="btn" type="submit">Add</button></form>`);
+    if (!free.length) setTimeout(() => { const i = $("popNewName"); if (i) i.focus(); }, 20);
+  }
+  function openTagPop(sid, pid, anchor) {
+    const s = state.screenings.get(sid), p = state.people.get(pid); if (!s || !p) return;
+    const v = (s.attendees || {})[pid];
+    showPop(anchor, `
+      <div class="pop-h"><b>${esc(p.name)}</b> at ${dayLabel(s.date)}, ${esc(s.time)}</div>
+      <span class="seg" role="group" style="${pvars(p)}">
+        <button type="button" class="s-maybe" data-pop-set="maybe" data-pid="${esc(pid)}" data-sid="${esc(sid)}" aria-pressed="${v === "maybe"}">Thinking</button>
+        <button type="button" class="s-bought" data-pop-set="bought" data-pid="${esc(pid)}" data-sid="${esc(sid)}" aria-pressed="${v === "bought"}">${TICKET}Bought</button>
+      </span>
+      <button type="button" class="pop-link danger" data-pop-set="none" data-pid="${esc(pid)}" data-sid="${esc(sid)}">Remove from this screening</button>`);
+  }
+  $("pop").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-pop-set]"); if (!b) return;
+    setAttendance(b.dataset.sid, b.dataset.pid, b.dataset.popSet);
+    closePop();
+  });
+  $("pop").addEventListener("submit", (e) => {
+    const f = e.target.closest("[data-pop-new]"); if (!f) return;
+    e.preventDefault();
+    const name = $("popNewName").value.trim(); if (!name || !db) return;
+    const pid = addPerson(name);
+    setAttendance(f.dataset.popNew, pid, "maybe");
+    closePop();
+    toast(`${name} added as thinking about it`);
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("pop").hidden) closePop(); });
+  window.addEventListener("resize", closePop);
+  $("board").addEventListener("scroll", closePop, { passive: true });
+  $("sEdit").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const sid = openScreeningId, s = state.screenings.get(sid); if (!s || !db) return;
+    const date = pickedDay("sDay") || s.date, time = $("sTime").value || s.time, venue = $("sVenue").value.trim();
+    state.screenings.set(sid, { ...s, date, time, venue });
+    write(`screenings/${sid}`, () => db.doc(`screenings/${sid}`).update({ date, time, venue }));
+    $("sDetails").open = false;
+    render(); toast("Screening updated");
+  });
+  confirmable("sDelWrap", "sDel", "Remove screening", "Remove this screening?", () => {
+    const sid = openScreeningId; if (!sid || !db) return;
+    state.screenings.delete(sid);
+    write(`screenings/${sid}`, () => db.doc(`screenings/${sid}`).delete());
+    $("dlgScreening").close(); render(); toast("Screening removed");
+  });
+
+  // ---------- film dialog ----------
+  let openFilmId = null;
+  function openFilm(id) { openFilmId = id; resetConfirm("fDelWrap", "fDel", "Remove film"); fillFilm(id, true); $("dlgFilm").showModal(); }
+  function fillFilm(id, initial) {
+    const f = state.films.get(id); if (!f) { $("dlgFilm").close(); return; }
+    $("fTitle").textContent = f.title;
+    if (initial) $("fName").value = f.title;
+    const ss = [...state.screenings.values()].filter((s) => s.filmId === id).sort((a, b) => `${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`));
+    $("fCount").textContent = `${ss.length}`;
+    $("fList").innerHTML = ss.length ? ss.map((s) => {
+      const at = attendees(s);
+      return `<button type="button" data-goto="${esc(s.id)}"><span><span class="when">${dayLabel(s.date)} · ${esc(s.time)}</span>${s.venue ? `<span class="ppl"> · ${esc(s.venue)}</span>` : ""}</span>
+        <span class="ppl">${at.length ? at.map(([pid]) => esc(state.people.get(pid).name)).join(", ") : "Nobody yet"}</span></button>`;
+    }).join("") : '<span style="font-size:14px;color:var(--ink-3)">No screenings for this film yet.</span>';
+  }
+  $("fList").addEventListener("click", (e) => { const b = e.target.closest("[data-goto]"); if (!b) return; $("dlgFilm").close(); openScreening(b.dataset.goto); });
+  $("fAddScreening").addEventListener("click", () => { const id = openFilmId; $("dlgFilm").close(); openAdd(id); });
+  $("fRename").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const title = $("fName").value.trim(), id = openFilmId, f = state.films.get(id);
+    if (!title || !f || !db || title === f.title) return;
+    state.films.set(id, { ...f, title });
+    write(`films/${id}`, () => db.doc(`films/${id}`).update({ title }));
+    render(); toast("Film renamed");
+  });
+  confirmable("fDelWrap", "fDel", "Remove film", "Remove the film and all its screenings?", () => {
+    const id = openFilmId; if (!id || !db) return;
+    for (const s of [...state.screenings.values()]) if (s.filmId === id) { state.screenings.delete(s.id); write(`screenings/${s.id}`, () => db.doc(`screenings/${s.id}`).delete()); }
+    state.films.delete(id);
+    write(`films/${id}`, () => db.doc(`films/${id}`).delete());
+    $("dlgFilm").close(); render(); toast("Film removed");
+  });
+
+  // ---------- people ----------
+  let newColor = null;
+  function nextColor() {
+    const used = new Set(sortedPeople().map((p) => p.color));
+    return PALETTE.find((c) => !used.has(c)) || PALETTE[state.people.size % PALETTE.length];
+  }
+  function addPerson(name, color) {
+    const id = newId();
+    const doc = { name, color: color || nextColor(), created: Date.now() };
+    state.people.set(id, { id, ...doc });
+    write(`people/${id}`, () => db.doc(`people/${id}`).set(doc));
+    return id;
+  }
+  let pickFor = null, confirmDel = null; // which palette is open ("new" or a person id), which removal is pending
+  const TRASH = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5h11M6.5 4.5V3h3v1.5M4 4.5l.7 8.6a1 1 0 0 0 1 .9h4.6a1 1 0 0 0 1-.9l.7-8.6"/></svg>';
+  const paletteHTML = (current, attr) => PALETTE.map((c) => `<button type="button" ${attr}="${c}" style="--c:${c}" aria-label="Use this color" aria-pressed="${c === current}"></button>`).join("");
+  function openPeople() { newColor = nextColor(); pickFor = null; confirmDel = null; fillPeople(); $("dlgPeople").showModal(); setTimeout(() => $("pName").focus(), 30); }
+  function fillPeople() {
+    const nb = $("pNewColor");
+    nb.style.setProperty("--c", newColor); nb.setAttribute("aria-expanded", String(pickFor === "new"));
+    $("pColors").hidden = pickFor !== "new";
+    if (pickFor === "new") $("pColors").innerHTML = paletteHTML(newColor, "data-color");
+    const people = sortedPeople();
+    $("pCount").textContent = people.length ? String(people.length) : "";
+    // keep focus in a name field if we re-render while someone is typing
+    const act = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.rename;
+    const ro = canWrite === false ? "disabled" : "";
+    $("pList").innerHTML = people.length ? people.map((p) => `
+      <div class="p-item" style="${pvars(p)}">
+        <div class="p-row">
+          <button type="button" class="swatch-btn" data-pick="${esc(p.id)}" aria-expanded="${pickFor === p.id}" aria-label="Change ${esc(p.name)}'s color" ${ro}></button>
+          <input type="text" value="${esc(p.name)}" data-rename="${esc(p.id)}" aria-label="Name" ${ro}>
+          ${confirmDel === p.id
+            ? `<span class="confirm">Remove? <button type="button" class="btn danger-solid" data-del-yes="${esc(p.id)}" style="padding:5px 10px">Yes</button><button type="button" class="btn ghost" data-del-no style="padding:5px 10px">No</button></span>`
+            : `<button type="button" class="icon-btn edit-only" data-del="${esc(p.id)}" aria-label="Remove ${esc(p.name)}" title="Remove">${TRASH}</button>`}
+        </div>
+        ${pickFor === p.id ? `<div class="palette">${paletteHTML(p.color, `data-pid="${esc(p.id)}" data-recolor`)}</div>` : ""}
+      </div>`).join("") : '<div style="color:var(--ink-3);font-size:14px;padding:8px 0">Nobody yet. Add yourself first.</div>';
+    if (act) { const inp = $("pList").querySelector(`[data-rename="${CSS.escape(act)}"]`); if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); } }
+  }
+  $("pNewColor").addEventListener("click", () => { pickFor = pickFor === "new" ? null : "new"; fillPeople(); });
+  $("pColors").addEventListener("click", (e) => { const b = e.target.closest("[data-color]"); if (!b) return; newColor = b.dataset.color; pickFor = null; fillPeople(); });
+  $("pAdd").addEventListener("submit", (e) => {
+    e.preventDefault(); const name = $("pName").value.trim(); if (!name || !db) return;
+    addPerson(name, newColor); $("pName").value = ""; newColor = nextColor(); pickFor = null; render(); $("pName").focus();
+  });
+  $("pList").addEventListener("click", (e) => {
+    const pk = e.target.closest("[data-pick]");
+    if (pk) { pickFor = pickFor === pk.dataset.pick ? null : pk.dataset.pick; confirmDel = null; fillPeople(); return; }
+    const rc = e.target.closest("[data-recolor]");
+    if (rc && db) {
+      const pid = rc.dataset.pid, p = state.people.get(pid), color = rc.dataset.recolor;
+      pickFor = null;
+      state.people.set(pid, { ...p, color });
+      write(`people/${pid}`, () => db.doc(`people/${pid}`).update({ color }));
+      render(); return;
+    }
+    const del = e.target.closest("[data-del]");
+    if (del) { confirmDel = del.dataset.del; pickFor = null; fillPeople(); return; }
+    if (e.target.closest("[data-del-no]")) { confirmDel = null; fillPeople(); return; }
+    const yes = e.target.closest("[data-del-yes]");
+    if (yes && db) {
+      const pid = yes.dataset.delYes;
+      confirmDel = null;
+      state.people.delete(pid);
+      if (state.focus === pid) state.focus = null;
+      write(`people/${pid}`, () => db.doc(`people/${pid}`).delete());
+      render(); toast("Removed");
+    }
+  });
+  let renameT;
+  $("pList").addEventListener("input", (e) => {
+    const inp = e.target.closest("[data-rename]"); if (!inp || !db) return;
+    clearTimeout(renameT);
+    renameT = setTimeout(() => {
+      const pid = inp.dataset.rename, name = inp.value.trim(), p = state.people.get(pid);
+      if (!name || !p || p.name === name) return;
+      state.people.set(pid, { ...p, name });
+      write(`people/${pid}`, () => db.doc(`people/${pid}`).update({ name }));
+      renderCrew(); renderBoard();
+    }, 500);
+  });
+
+  // ---------- inline confirm helper ----------
+  function confirmable(wrapId, btnId, label, question, onYes) {
+    $(wrapId).addEventListener("click", (e) => {
+      if (e.target.closest(`#${btnId}`)) {
+        $(wrapId).innerHTML = `<span class="confirm">${question} <button type="button" class="btn danger-solid" data-yes>Remove</button><button type="button" class="btn ghost" data-no>Keep</button></span>`;
+      } else if (e.target.closest("[data-no]")) resetConfirm(wrapId, btnId, label);
+      else if (e.target.closest("[data-yes]")) onYes();
+    });
+  }
+  function resetConfirm(wrapId, btnId, label) { $(wrapId).innerHTML = `<button class="btn danger" type="button" id="${btnId}">${label}</button>`; }
+
+  // ---------- global clicks ----------
+  document.addEventListener("click", (e) => {
+    const t = e.target;
+    if (t.closest("#pop")) return;
+    const ap = t.closest("[data-addp]");
+    const tg = t.closest("[data-tag-s]");
+    const sameAnchor = popAnchor && (ap === popAnchor || tg === popAnchor);
+    if (!$("pop").hidden) closePop();
+    if (ap) { if (!sameAnchor) openAddPop(ap.dataset.addp, ap); return; }
+    if (tg) { if (!sameAnchor) openTagPop(tg.dataset.tagS, tg.dataset.tagP, tg); return; }
+    if (t.closest("[data-close]")) { t.closest("dialog").close(); return; }
+    const sc = t.closest("[data-screening]"); if (sc) { openScreening(sc.dataset.screening); return; }
+    const fl = t.closest("[data-film]"); if (fl) { openFilm(fl.dataset.film); return; }
+    if (t.closest("[data-add]") || t.closest("#btnAdd")) { openAdd(); return; }
+    if (t.closest("#btnPeople") || t.closest("#crewAdd")) { openPeople(); return; }
+    const pc = t.closest("[data-person]");
+    if (pc) { state.focus = state.focus === pc.dataset.person ? null : pc.dataset.person; renderCrew(); renderBoard(); }
+  });
+  // click on backdrop closes dialogs
+  for (const d of document.querySelectorAll("dialog")) d.addEventListener("click", (e) => { if (e.target === d) d.close(); });
+
+  function setReadOnly() {
+    canWrite = false;
+    document.body.classList.add("ro");
+    const b = $("banner"); b.hidden = false;
+    b.textContent = "You can view this plan but not edit it. Ask the person who shared it to give you Contributor access.";
+    render();
+  }
+
+  // ---------- connect (Firebase Firestore) ----------
+  // Paste your Firebase web app config here (Firebase console > Project settings > Your apps).
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyChMWCBYj1YGUtTcir_l9PM_dLAIy7g2uI",
+    authDomain: "idfaplanner.firebaseapp.com",
+    projectId: "idfaplanner",
+    storageBucket: "idfaplanner.firebasestorage.app",
+    messagingSenderId: "272025912656",
+    appId: "1:272025912656:web:6a554cf68ae03015111855"
+  };
+  // Everyone signs in to this one Firebase account; the page only asks for its password.
+  // Must match the email in firestore.rules and the user created in Firebase Authentication.
+  const SHARED_EMAIL = "plan@idfaplanner.firebaseapp.com";
+
+  render();
+  (() => {
+    if (typeof firebase === "undefined") { $("app").hidden = false; offline("Couldn't load the database library. Check your connection and reload."); return; }
+    if (FIREBASE_CONFIG.apiKey.startsWith("PASTE")) { $("app").hidden = false; offline("This copy isn't connected to a database yet. Paste your Firebase config into index.html (see README)."); return; }
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const auth = firebase.auth();
+    let started = false;
+    auth.onAuthStateChanged((user) => {
+      $("lock").hidden = !!user;
+      $("app").hidden = !user;
+      if (!user) { $("lockPw").focus(); return; }
+      if (!started) { started = true; connect(); }
+    });
+    $("formLock").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const err = $("lockErr"), go = $("lockGo");
+      err.hidden = true; go.disabled = true;
+      try {
+        await auth.signInWithEmailAndPassword(SHARED_EMAIL, $("lockPw").value);
+        $("lockPw").value = "";
+      } catch (ex) {
+        err.hidden = false;
+        err.textContent = ex.code === "auth/invalid-credential" || ex.code === "auth/wrong-password" || ex.code === "auth/missing-password"
+          ? "That's not the password."
+          : ex.code === "auth/too-many-requests" ? "Too many tries. Wait a few minutes and try again."
+          : "Couldn't check the password. Check your connection and try again.";
+      } finally { go.disabled = false; }
+    });
+    // Signing out leaves the old subscriptions erroring, so reload into a clean locked page.
+    $("btnLock").addEventListener("click", () => auth.signOut().then(() => location.reload()));
+  })();
+  function connect() {
+    db = firebase.firestore();
+    canWrite = true;
+    let loaded = 0;
+    const sub = (name, map) => db.collection(name).onSnapshot((snap) => {
+      map.clear();
+      for (const d of snap.docs) { const v = d.data(); if (v) map.set(d.id, { id: d.id, ...v }); }
+      if (++loaded >= 3) state.ready = true;
+      render();
+    }, (err) => {
+      console.warn(name, err);
+      offline(err && err.code === "permission-denied"
+        ? "The database won't let this page read the plan. Check the Firestore rules (see README)."
+        : "Lost the connection to the plan. Reload the page to try again.");
+    });
+    sub("people", state.people); sub("films", state.films); sub("screenings", state.screenings);
+  }
+  function offline(msg) {
+    state.ready = true;
+    const b = $("banner"); b.hidden = false; b.textContent = msg;
+    canWrite = false; document.body.classList.add("ro"); render();
+  }
+})();
+</script>
+
+</body>
+</html>
