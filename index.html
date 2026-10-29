@@ -157,6 +157,10 @@ thead th.wknd { background: color-mix(in srgb, var(--weekend) 70%, var(--surface
 .film button:hover { background: var(--surface-2); }
 .film-title { font-weight: 700; font-size: 14.5px; line-height: 1.25; text-wrap: balance; overflow-wrap: anywhere; }
 .film-meta { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); margin-top: 4px; }
+.film.has-links button { height: auto; min-height: 0; padding-bottom: 4px; }
+.film-links { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 0 12px 10px; font-size: 12px; font-weight: 600; }
+.film-links a { color: var(--accent); text-decoration: none; }
+.film-links a:hover { text-decoration: underline; }
 td.cell { padding: 6px; min-width: 128px; position: relative; }
 td.cell.wknd { background: color-mix(in srgb, var(--weekend) 55%, transparent); }
 .cell-stack { display: flex; flex-direction: column; gap: 6px; min-height: 64px; }
@@ -242,7 +246,7 @@ dialog::backdrop { background: rgb(12 14 30 / .45); }
 .field .hint { font-size: 12px; color: var(--ink-3); }
 .row2 { display: grid; grid-template-columns: 140px 1fr; gap: 12px; }
 @media (max-width: 440px) { .row2 { grid-template-columns: 1fr; } }
-input[type="text"], input[type="time"], input[type="password"] {
+input[type="text"], input[type="time"], input[type="password"], input[type="url"] {
   width: 100%; border: 1px solid var(--line-2); background: var(--surface-2); border-radius: 8px; padding: 9px 11px; font-size: 15px;
 }
 input[type="time"] { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
@@ -403,6 +407,8 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
         <div class="field"><label for="addTime">Starts at</label><input type="time" id="addTime" value="19:30" step="300"></div>
         <div class="field"><label for="addVenue">Venue <span style="font-weight:400;color:var(--ink-3)">(optional)</span></label><input type="text" id="addVenue" placeholder="e.g. Tuschinski 1" autocomplete="off"></div>
       </div>
+      <div class="field"><label for="addIdfa">IDFA page <span style="font-weight:400;color:var(--ink-3)">(optional)</span></label><input type="url" id="addIdfa" placeholder="https://www.idfa.nl/…" autocomplete="off"></div>
+      <div class="field"><label for="addTrailer">Trailer <span style="font-weight:400;color:var(--ink-3)">(optional)</span></label><input type="url" id="addTrailer" placeholder="e.g. a YouTube or Vimeo link" autocomplete="off"></div>
       <div class="err" id="addErr" hidden></div>
     </div>
     <div class="dlg-foot">
@@ -458,6 +464,13 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
       <form class="field edit-only" id="fRename">
         <label for="fName">Title</label>
         <div class="quick-add"><input type="text" id="fName" autocomplete="off"><button class="btn" type="submit">Rename</button></div>
+      </form>
+      <form class="field edit-only" id="fLinks" novalidate>
+        <label for="fIdfa">IDFA page</label>
+        <input type="url" id="fIdfa" placeholder="https://www.idfa.nl/…" autocomplete="off">
+        <label for="fTrailer">Trailer</label>
+        <div class="quick-add"><input type="url" id="fTrailer" placeholder="e.g. a YouTube or Vimeo link" autocomplete="off"><button class="btn" type="submit">Save links</button></div>
+        <div class="err" id="fLinksErr" hidden></div>
       </form>
       <div class="field">
         <div class="section-h"><h3>Screenings</h3><small id="fCount"></small></div>
@@ -594,6 +607,30 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
       return fa < fb ? -1 : fa > fb ? 1 : (a.title || "").localeCompare(b.title || "");
     });
   }
+  // ---------- film links ----------
+  const LINKS = [["idfaUrl", "IDFA page"], ["trailerUrl", "Trailer"]];
+  // "" for empty, null for something that isn't a web address; adds https:// when it's left off.
+  function cleanUrl(v) {
+    v = v.trim(); if (!v) return "";
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(v)) v = "https://" + v;
+    try { const u = new URL(v); return /^https?:$/.test(u.protocol) && u.hostname.includes(".") ? u.href : null; } catch { return null; }
+  }
+  const safeHref = (v) => (typeof v === "string" && /^https?:\/\//i.test(v) ? v : "");
+  function filmLinks(f) {
+    const a = LINKS.filter(([k]) => safeHref(f[k])).map(([k, label]) => `<a href="${esc(f[k])}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`);
+    return a.length ? `<div class="film-links">${a.join("")}</div>` : "";
+  }
+  // Reads the two link inputs; returns { idfaUrl, trailerUrl } or an error message.
+  function readLinks(idfaId, trailerId) {
+    const out = {};
+    for (const [k, label, id] of [[...LINKS[0], idfaId], [...LINKS[1], trailerId]]) {
+      const v = cleanUrl($(id).value);
+      if (v === null) return `The ${label.toLowerCase()} link doesn't look like a web address.`;
+      out[k] = v;
+    }
+    return out;
+  }
+
   function renderBoard() {
     const films = filmOrder();
     let h = '<table><thead><tr><th class="corner">Film</th>';
@@ -609,9 +646,10 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     for (const f of films) {
       const ss = [...state.screenings.values()].filter((s) => s.filmId === f.id);
       const nGoing = new Set(ss.flatMap((s) => attendees(s).map(([pid]) => pid))).size;
-      h += `<tr><th class="film" scope="row"><button type="button" data-film="${esc(f.id)}" title="Edit film">
+      const links = filmLinks(f);
+      h += `<tr><th class="film${links ? " has-links" : ""}" scope="row"><button type="button" data-film="${esc(f.id)}" title="Edit film">
         <div class="film-title">${esc(f.title)}</div>
-        <div class="film-meta">${ss.length} screening${ss.length === 1 ? "" : "s"} · ${nGoing} going</div></button></th>`;
+        <div class="film-meta">${ss.length} screening${ss.length === 1 ? "" : "s"} · ${nGoing} going</div></button>${links}</th>`;
       for (const d of DAYS) {
         const here = ss.filter((s) => s.date === d.key).sort((a, b) => (a.time || "").localeCompare(b.time || ""));
         h += `<td class="cell ${d.wknd ? "wknd" : ""}"><div class="cell-stack ${here.length ? "has" : ""}">`;
@@ -653,23 +691,42 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     const f = filmId ? state.films.get(filmId) : null;
     $("addFilm").value = f ? f.title : "";
     $("addVenue").value = "";
+    $("addIdfa").value = f ? f.idfaUrl || "" : "";
+    $("addTrailer").value = f ? f.trailerUrl || "" : "";
     $("addErr").hidden = true;
     dayChips($("addDays"), "addDay", dayKey || "");
     $("dlgAdd").showModal();
     setTimeout(() => (f ? $("addTime") : $("addFilm")).focus(), 30);
   }
+  const findFilm = (title) => [...state.films.values()].find((f) => f.title.trim().toLowerCase() === title.trim().toLowerCase());
+  // Picking an existing film fills in its links.
+  $("addFilm").addEventListener("change", () => {
+    const f = findFilm($("addFilm").value); if (!f) return;
+    $("addIdfa").value = f.idfaUrl || ""; $("addTrailer").value = f.trailerUrl || "";
+  });
   $("formAdd").addEventListener("submit", async (e) => {
     e.preventDefault();
     const title = $("addFilm").value.trim(), date = pickedDay("addDay"), time = $("addTime").value, venue = $("addVenue").value.trim();
     const err = !title ? "Give the film a title." : !date ? "Pick the day of the screening." : !time ? "Add the start time." : "";
-    if (err) { $("addErr").textContent = err; $("addErr").hidden = false; return; }
+    const links = err || readLinks("addIdfa", "addTrailer");
+    if (typeof links === "string") { $("addErr").textContent = links; $("addErr").hidden = false; return; }
     if (!db) { toast("The shared plan isn't connected, so this can't be saved."); return; }
-    let film = [...state.films.values()].find((f) => f.title.trim().toLowerCase() === title.toLowerCase());
+    let film = findFilm(title);
     let filmId = film && film.id;
     if (!filmId) {
       filmId = newId();
-      state.films.set(filmId, { id: filmId, title, created: Date.now() });
-      write(`films/${filmId}`, () => db.doc(`films/${filmId}`).set({ title, created: Date.now() }));
+      const doc = { title, created: Date.now() };
+      for (const [k] of LINKS) if (links[k]) doc[k] = links[k];
+      state.films.set(filmId, { id: filmId, ...doc });
+      write(`films/${filmId}`, () => db.doc(`films/${filmId}`).set(doc));
+    } else {
+      // An empty box here leaves the film's link alone; links are removed from the film dialog.
+      const patch = {};
+      for (const [k] of LINKS) if (links[k] && links[k] !== film[k]) patch[k] = links[k];
+      if (Object.keys(patch).length) {
+        state.films.set(filmId, { ...film, ...patch });
+        write(`films/${filmId}`, () => db.doc(`films/${filmId}`).update(patch));
+      }
     }
     const sid = newId();
     const doc = { filmId, date, time, venue, attendees: {}, created: Date.now() };
@@ -812,7 +869,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
   function fillFilm(id, initial) {
     const f = state.films.get(id); if (!f) { $("dlgFilm").close(); return; }
     $("fTitle").textContent = f.title;
-    if (initial) $("fName").value = f.title;
+    if (initial) { $("fName").value = f.title; $("fIdfa").value = f.idfaUrl || ""; $("fTrailer").value = f.trailerUrl || ""; $("fLinksErr").hidden = true; }
     const ss = [...state.screenings.values()].filter((s) => s.filmId === id).sort((a, b) => `${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`));
     $("fCount").textContent = `${ss.length}`;
     $("fList").innerHTML = ss.length ? ss.map((s) => {
@@ -830,6 +887,21 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     state.films.set(id, { ...f, title });
     write(`films/${id}`, () => db.doc(`films/${id}`).update({ title }));
     render(); toast("Film renamed");
+  });
+  $("fLinks").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const id = openFilmId, f = state.films.get(id); if (!f || !db) return;
+    const links = readLinks("fIdfa", "fTrailer");
+    if (typeof links === "string") { $("fLinksErr").textContent = links; $("fLinksErr").hidden = false; return; }
+    $("fLinksErr").hidden = true;
+    const patch = {};
+    for (const [k] of LINKS) if (links[k] !== (f[k] || "")) patch[k] = links[k] || firebase.firestore.FieldValue.delete();
+    $("fIdfa").value = links.idfaUrl; $("fTrailer").value = links.trailerUrl;
+    if (!Object.keys(patch).length) return;
+    const next = { ...f }; for (const [k] of LINKS) { if (links[k]) next[k] = links[k]; else delete next[k]; }
+    state.films.set(id, next);
+    write(`films/${id}`, () => db.doc(`films/${id}`).update(patch));
+    render(); toast("Links saved");
   });
   confirmable("fDelWrap", "fDel", "Remove film", "Remove the film and all its screenings?", () => {
     const id = openFilmId; if (!id || !db) return;
