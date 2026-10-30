@@ -110,6 +110,16 @@ h1 .yr { color: var(--accent); }
 .crew-chip .count svg { width: 10px; height: 10px; }
 .crew-chip[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--surface)); }
 .crew-chip:hover { border-color: var(--c); }
+.crew-toggle {
+  display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--surface);
+  border-radius: 99px; padding: 4px 10px 4px 7px; font-size: 13px; font-weight: 600;
+}
+.crew-toggle:hover, .crew-toggle[aria-expanded="true"] { border-color: var(--ink-3); }
+.crew-toggle .stack { display: inline-flex; }
+.crew-toggle .pip { width: 14px; height: 14px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--surface); }
+.crew-toggle .pip + .pip { margin-left: -5px; }
+.crew-toggle svg { width: 12px; height: 12px; color: var(--ink-3); transition: transform .15s; }
+.crew-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
 .legend { display: flex; gap: 14px; align-items: center; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
 .legend .tag { pointer-events: none; }
 
@@ -195,13 +205,17 @@ button.tag:hover { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--c); }
 .pop-h b { color: var(--ink); }
 .pop-list { display: flex; flex-direction: column; max-height: 260px; overflow: auto; }
 .pop-row { display: flex; align-items: center; gap: 8px; padding: 5px 4px; border-radius: 7px; }
-.pop-row:hover { background: var(--surface-2); }
+.pop-row:hover, .pop-row.active { background: var(--surface-2); }
+.pop-row.new .who-name { color: var(--ink-2); }
+.pop-hint { font-size: 12px; color: var(--ink-3); padding: 2px 4px; }
+.pop #popFind { padding: 7px 10px; font-size: 14px; }
+/* Opening upwards: keep the search box next to the + participant button so it doesn't move while suggestions grow */
+.pop.above .pop-h { order: -2; }
+.pop.above .pop-list, .pop.above .pop-hint { order: -1; }
 .pop-row .who-name { min-width: 0; font-size: 14px; }
 .pop-row .mini { border: 1px solid var(--line-2); background: var(--surface); border-radius: 6px; padding: 3px 7px; font-size: 12px; font-weight: 600; color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px; }
 .pop-row .mini svg { width: 11px; height: 11px; }
 .pop-row .mini:hover { border-color: var(--c); color: var(--ink); }
-.pop .quick-add input { padding: 6px 9px; font-size: 14px; }
-.pop .quick-add .btn { padding: 6px 12px; }
 .pop .seg { width: 100%; }
 .pop .seg button { flex: 1; justify-content: center; padding: 8px; }
 .pop-link { background: none; border: 0; text-align: left; font-size: 13px; font-weight: 600; padding: 6px 4px; border-radius: 6px; color: var(--ink-2); }
@@ -574,16 +588,23 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
   })();
 
   // ---------- render: crew ----------
+  // Collapsed to "N people" by default; the highlighted person's chip stays visible either way.
+  let crewOpen = false;
+  try { crewOpen = localStorage.getItem("crewOpen") === "1"; } catch {}
+  const CHEVRON = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg>';
   function renderCrew() {
     const el = $("crew");
     const people = sortedPeople();
     let html = '<span class="crew-label">People</span>';
     if (!people.length) html += `<span style="font-size:13px;color:var(--ink-3)">${state.ready ? "Nobody yet." : "Loading…"}</span>`;
-    for (const p of people) {
-      html += `<button type="button" class="crew-chip" data-person="${esc(p.id)}" aria-pressed="${state.focus === p.id}" style="${pvars(p)}" title="Highlight ${esc(p.name)}'s screenings">
+    else html += `<button type="button" class="crew-toggle" id="crewToggle" aria-expanded="${crewOpen}" title="${crewOpen ? "Hide" : "Show"} everyone">
+        <span class="stack" aria-hidden="true">${people.slice(0, 5).map((p) => `<span class="pip" style="${pvars(p)}"></span>`).join("")}</span>
+        ${people.length} ${people.length === 1 ? "person" : "people"}${CHEVRON}</button>`;
+    for (const p of crewOpen ? people : people.filter((p) => p.id === state.focus)) {
+      html += `<button type="button" class="crew-chip" data-person="${esc(p.id)}" aria-pressed="${state.focus === p.id}" style="${pvars(p)}" title="${state.focus === p.id ? "Stop highlighting" : `Highlight ${esc(p.name)}'s screenings`}">
         <span class="dot">${esc(initials(p.name))}</span>${esc(p.name)}</button>`;
     }
-    if (canWrite !== false) html += `<button type="button" class="btn ghost edit-only" id="crewAdd" style="padding:4px 10px;font-size:13px">+ Add person</button>`;
+    if (canWrite !== false && (crewOpen || !people.length)) html += `<button type="button" class="btn ghost edit-only" id="crewAdd" style="padding:4px 10px;font-size:13px">+ Add person</button>`;
     el.innerHTML = html;
   }
 
@@ -787,35 +808,85 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
 
   // ---------- popovers on the grid ----------
   let popAnchor = null;
-  function showPop(anchor, html) {
+  // grow: extra height the popover may grow by later (suggestions), so it opens on the side with room for it.
+  function showPop(anchor, html, grow = 0) {
     const pop = $("pop");
     pop.innerHTML = html; pop.hidden = false; popAnchor = anchor;
-    const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+    pop.classList.remove("above"); pop.style.top = pop.style.bottom = pop.style.maxHeight = "";
+    const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight + grow;
     const vw = window.innerWidth, vh = window.innerHeight;
-    let left = Math.min(Math.max(16, r.left), vw - pw - 16);
-    let top = r.bottom + 6;
-    if (top + ph > vh - 12) top = Math.max(12, r.top - ph - 6);
-    pop.style.left = left + "px"; pop.style.top = top + "px";
+    const roomBelow = vh - 12 - (r.bottom + 6), roomAbove = r.top - 6 - 12;
+    pop.style.left = Math.min(Math.max(16, r.left), vw - pw - 16) + "px";
+    if (ph > roomBelow && roomAbove > roomBelow) {
+      pop.classList.add("above"); pop.style.bottom = (vh - r.top + 6) + "px"; pop.style.maxHeight = roomAbove + "px";
+    } else { pop.style.top = (r.bottom + 6) + "px"; pop.style.maxHeight = roomBelow + "px"; }
   }
-  function closePop() { $("pop").hidden = true; popAnchor = null; }
+  function closePop() { $("pop").hidden = true; popAnchor = null; addPop = null; }
   function screeningLabel(s) {
     const f = state.films.get(s.filmId);
     return `<b>${esc(f ? f.title : "Film")}</b> · ${dayLabel(s.date)}, ${esc(s.time)}`;
   }
+  // + participant: a search box that suggests people not yet on the screening, or offers to add a new one.
+  const MAX_SUGGEST = 6;
+  let addPop = null; // { sid, rows, active } while the + participant popover is open
+  function addPopRows(sid, q) {
+    const s = state.screenings.get(sid), a = (s && s.attendees) || {};
+    q = q.trim(); const lq = q.toLowerCase();
+    if (!lq) return [];
+    const people = sortedPeople();
+    const rank = (n) => (n.startsWith(lq) ? 0 : n.includes(" " + lq) ? 1 : 2);
+    const rows = people
+      .filter((p) => a[p.id] !== "bought" && a[p.id] !== "maybe" && p.name.toLowerCase().includes(lq))
+      .sort((x, y) => rank(x.name.toLowerCase()) - rank(y.name.toLowerCase()))
+      .slice(0, MAX_SUGGEST).map((p) => ({ pid: p.id }));
+    if (!people.some((p) => p.name.trim().toLowerCase() === lq)) rows.push({ name: q });
+    return rows;
+  }
+  function addPopListHTML() {
+    const { sid, rows, active } = addPop;
+    const s = state.screenings.get(sid), a = (s && s.attendees) || {};
+    const q = $("popFind") ? $("popFind").value.trim() : "";
+    if (!q) {
+      const free = sortedPeople().filter((p) => a[p.id] !== "bought" && a[p.id] !== "maybe").length;
+      return `<div class="pop-hint">${!state.people.size ? "No people yet. Type a name to add the first one." : free ? `Start typing a name. ${free} ${free === 1 ? "person isn't" : "people aren't"} on this one yet.` : "Everyone's already on this one. Type a name to add someone new."}</div>`;
+    }
+    const going = sortedPeople().find((p) => p.name.trim().toLowerCase() === q.toLowerCase() && (a[p.id] === "bought" || a[p.id] === "maybe"));
+    const html = rows.map((row, i) => {
+      const p = row.pid && state.people.get(row.pid);
+      const name = p ? `<span class="swatch"></span>${esc(p.name)}` : `+ Add “${esc(row.name)}”`;
+      return `<div class="pop-row${p ? "" : " new"}${i === active ? " active" : ""}" id="popOpt${i}" role="option" aria-selected="${i === active}" style="${p ? pvars(p) : "--c:var(--accent)"}">
+          <span class="who-name">${name}</span>
+          <button type="button" class="mini" data-add-row="${i}" data-status="maybe" tabindex="-1">Thinking</button>
+          <button type="button" class="mini" data-add-row="${i}" data-status="bought" tabindex="-1">${TICKET}Bought</button>
+        </div>`;
+    }).join("");
+    return (going ? `<div class="pop-hint">${esc(going.name)} is already on this one.</div>` : "")
+      + (html ? `<div class="pop-list" role="listbox" id="popList">${html}</div>` : "")
+      + (rows.length ? '<div class="pop-hint">Enter: thinking · Shift+Enter: bought</div>' : "");
+  }
+  function fillAddPop() {
+    addPop.active = Math.min(Math.max(0, addPop.active), addPop.rows.length - 1);
+    $("popResults").innerHTML = addPopListHTML();
+    if (addPop.rows.length) $("popFind").setAttribute("aria-activedescendant", `popOpt${addPop.active}`);
+    else $("popFind").removeAttribute("aria-activedescendant");
+    const act = $(`popOpt${addPop.active}`); if (act) act.scrollIntoView({ block: "nearest" });
+  }
   function openAddPop(sid, anchor) {
     const s = state.screenings.get(sid); if (!s) return;
-    const a = s.attendees || {};
-    const free = sortedPeople().filter((p) => a[p.id] !== "bought" && a[p.id] !== "maybe");
+    addPop = { sid, rows: [], active: 0 };
     showPop(anchor, `
       <div class="pop-h">Add to ${screeningLabel(s)}</div>
-      ${free.length ? `<div class="pop-list">${free.map((p) => `
-        <div class="pop-row" style="${pvars(p)}">
-          <span class="who-name"><span class="swatch"></span>${esc(p.name)}</span>
-          <button type="button" class="mini" data-pop-set="maybe" data-pid="${esc(p.id)}" data-sid="${esc(sid)}">Thinking</button>
-          <button type="button" class="mini" data-pop-set="bought" data-pid="${esc(p.id)}" data-sid="${esc(sid)}">${TICKET}Bought</button>
-        </div>`).join("")}</div>` : `<div class="pop-h" style="font-weight:400">${state.people.size ? "Everyone's already on this one." : "No people yet. Add the first one:"}</div>`}
-      <form class="quick-add" data-pop-new="${esc(sid)}"><input type="text" id="popNewName" placeholder="Someone new…" autocomplete="off" aria-label="New person's name"><button class="btn" type="submit">Add</button></form>`);
-    if (!free.length) setTimeout(() => { const i = $("popNewName"); if (i) i.focus(); }, 20);
+      <input type="text" id="popFind" placeholder="Type a name…" autocomplete="off" aria-label="Who's going?" role="combobox" aria-expanded="true" aria-controls="popResults" aria-autocomplete="list">
+      <div id="popResults" style="display:contents">${addPopListHTML()}</div>`, 3 * 36);
+    $("popFind").focus();
+  }
+  function pickAddRow(i, status) {
+    const row = addPop && addPop.rows[i]; if (!row || !db) return;
+    const sid = addPop.sid;
+    const pid = row.pid || addPerson(row.name);
+    setAttendance(sid, pid, status);
+    closePop();
+    if (!row.pid) toast(`${row.name} added as ${status === "bought" ? "having a ticket" : "thinking about it"}`);
   }
   function openTagPop(sid, pid, anchor) {
     const s = state.screenings.get(sid), p = state.people.get(pid); if (!s || !p) return;
@@ -829,21 +900,31 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
       <button type="button" class="pop-link danger" data-pop-set="none" data-pid="${esc(pid)}" data-sid="${esc(sid)}">Remove from this screening</button>`);
   }
   $("pop").addEventListener("click", (e) => {
+    const r = e.target.closest("[data-add-row]");
+    if (r) { pickAddRow(+r.dataset.addRow, r.dataset.status); return; }
     const b = e.target.closest("[data-pop-set]"); if (!b) return;
     setAttendance(b.dataset.sid, b.dataset.pid, b.dataset.popSet);
     closePop();
   });
-  $("pop").addEventListener("submit", (e) => {
-    const f = e.target.closest("[data-pop-new]"); if (!f) return;
-    e.preventDefault();
-    const name = $("popNewName").value.trim(); if (!name || !db) return;
-    const pid = addPerson(name);
-    setAttendance(f.dataset.popNew, pid, "maybe");
-    closePop();
-    toast(`${name} added as thinking about it`);
+  $("pop").addEventListener("input", (e) => {
+    if (e.target.id !== "popFind" || !addPop) return;
+    addPop.rows = addPopRows(addPop.sid, e.target.value); addPop.active = 0; fillAddPop();
+  });
+  $("pop").addEventListener("keydown", (e) => {
+    if (e.target.id !== "popFind" || !addPop) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!addPop.rows.length) return;
+      addPop.active = (addPop.active + (e.key === "ArrowDown" ? 1 : -1) + addPop.rows.length) % addPop.rows.length;
+      fillAddPop();
+    } else if (e.key === "Enter" && !e.isComposing) {
+      e.preventDefault();
+      pickAddRow(addPop.active, e.shiftKey ? "bought" : "maybe");
+    }
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("pop").hidden) closePop(); });
-  window.addEventListener("resize", closePop);
+  // A phone keyboard opening for the search box resizes the window; don't close on that.
+  window.addEventListener("resize", () => { if (!$("pop").contains(document.activeElement)) closePop(); });
   $("board").addEventListener("scroll", closePop, { passive: true });
   $("sEdit").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -1023,6 +1104,11 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     const fl = t.closest("[data-film]"); if (fl) { openFilm(fl.dataset.film); return; }
     if (t.closest("[data-add]") || t.closest("#btnAdd")) { openAdd(); return; }
     if (t.closest("#btnPeople") || t.closest("#crewAdd")) { openPeople(); return; }
+    if (t.closest("#crewToggle")) {
+      crewOpen = !crewOpen;
+      try { localStorage.setItem("crewOpen", crewOpen ? "1" : "0"); } catch {}
+      renderCrew(); $("crewToggle").focus(); return;
+    }
     const pc = t.closest("[data-person]");
     if (pc) { state.focus = state.focus === pc.dataset.person ? null : pc.dataset.person; renderCrew(); renderBoard(); }
   });
