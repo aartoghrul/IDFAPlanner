@@ -383,7 +383,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
   <div class="banner" id="banner" hidden></div>
 
   <div class="toolbar">
-    <div class="crew" id="crew"><span class="crew-label">People</span></div>
+    <div class="crew" id="crew"><span class="crew-label">Highlight</span></div>
     <div class="legend">
       <span class="tag bought" style="--c:var(--ink-2);--on:var(--surface)"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h7A1.5 1.5 0 0 1 11 3.5v1a1.5 1.5 0 0 0 0 3v1A1.5 1.5 0 0 1 9.5 10h-7A1.5 1.5 0 0 1 1 8.5v-1a1.5 1.5 0 0 0 0-3z"/></svg><span>Has ticket</span></span>
       <span class="tag maybe" style="--c:var(--ink-3)"><span>Thinking about it</span></span>
@@ -394,7 +394,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
 
   <div class="foot">
     <span>Everyone with the password sees the same plan, live.</span>
-    <span>Click a person above to highlight their screenings.</span>
+    <span>Use Highlight above to pick out one person's screenings.</span>
     <button type="button" class="link" id="btnLock">Lock this device</button>
   </div>
 </div>
@@ -595,16 +595,15 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
   function renderCrew() {
     const el = $("crew");
     const people = sortedPeople();
-    let html = '<span class="crew-label">People</span>';
-    if (!people.length) html += `<span style="font-size:13px;color:var(--ink-3)">${state.ready ? "Nobody yet." : "Loading…"}</span>`;
-    else html += `<button type="button" class="crew-toggle" id="crewToggle" aria-expanded="${crewOpen}" title="${crewOpen ? "Hide" : "Show"} everyone">
+    let html = '<span class="crew-label">Highlight</span>';
+    if (!people.length) html += `<span style="font-size:13px;color:var(--ink-3)">${state.ready ? "Nobody yet. Add people with the People button." : "Loading…"}</span>`;
+    else html += `<button type="button" class="crew-toggle" id="crewToggle" aria-expanded="${crewOpen}" title="${crewOpen ? "Hide the list" : "Pick someone to highlight"}">
         <span class="stack" aria-hidden="true">${people.slice(0, 5).map((p) => `<span class="pip" style="${pvars(p)}"></span>`).join("")}</span>
         ${people.length} ${people.length === 1 ? "person" : "people"}${CHEVRON}</button>`;
     for (const p of crewOpen ? people : people.filter((p) => p.id === state.focus)) {
       html += `<button type="button" class="crew-chip" data-person="${esc(p.id)}" aria-pressed="${state.focus === p.id}" style="${pvars(p)}" title="${state.focus === p.id ? "Stop highlighting" : `Highlight ${esc(p.name)}'s screenings`}">
         <span class="dot">${esc(initials(p.name))}</span>${esc(p.name)}</button>`;
     }
-    if (canWrite !== false && (crewOpen || !people.length)) html += `<button type="button" class="btn ghost edit-only" id="crewAdd" style="padding:4px 10px;font-size:13px">+ Add person</button>`;
     el.innerHTML = html;
   }
 
@@ -1103,7 +1102,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     const sc = t.closest("[data-screening]"); if (sc) { openScreening(sc.dataset.screening); return; }
     const fl = t.closest("[data-film]"); if (fl) { openFilm(fl.dataset.film); return; }
     if (t.closest("[data-add]") || t.closest("#btnAdd")) { openAdd(); return; }
-    if (t.closest("#btnPeople") || t.closest("#crewAdd")) { openPeople(); return; }
+    if (t.closest("#btnPeople")) { openPeople(); return; }
     if (t.closest("#crewToggle")) {
       crewOpen = !crewOpen;
       try { localStorage.setItem("crewOpen", crewOpen ? "1" : "0"); } catch {}
