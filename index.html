@@ -173,7 +173,9 @@ thead th.wknd { background: color-mix(in srgb, var(--weekend) 70%, var(--surface
 .film-links { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 0 12px 10px; font-size: 12px; font-weight: 600; }
 .film-links a { color: var(--accent); text-decoration: none; }
 .film-links a:hover { text-decoration: underline; }
-td.cell { padding: 6px; min-width: 128px; position: relative; }
+/* Every day column the same width; contents (long venues, names) shorten with … instead of widening it */
+thead th.day, td.cell { width: 150px; min-width: 150px; }
+td.cell { padding: 6px; position: relative; }
 td.cell.wknd { background: color-mix(in srgb, var(--weekend) 55%, transparent); }
 /* Past days: folded into a slim column during the festival, expandable */
 thead th.past-toggle, td.past-gap { min-width: 0; width: 34px; padding: 0; }
@@ -188,7 +190,7 @@ td.past-gap { background: var(--surface-2); }
 .past-btn span { writing-mode: vertical-rl; transform: rotate(180deg); }
 thead th.past .day-num, thead th.past .day-dow { opacity: .55; }
 td.cell.past { background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
-.cell-stack { display: flex; flex-direction: column; gap: 6px; min-height: 64px; }
+.cell-stack { display: flex; flex-direction: column; gap: 6px; min-height: 64px; contain: inline-size; }
 .screening {
   display: flex; flex-direction: column; gap: 6px; text-align: left; width: 100%;
   background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r);
@@ -837,7 +839,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     if (past.length) h += `<th class="past-toggle"><button type="button" class="past-btn" id="pastToggle" aria-expanded="${pastOpen}" title="${pastOpen ? "Hide past days" : `Show past days (${pastLabel})`}">
       <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${pastOpen ? "M7.5 3l-3 3 3 3" : "M4.5 3l3 3-3 3"}"/></svg>
       <span>${pastOpen ? "Hide past" : pastLabel}</span></button></th>`;
-    for (const d of days) h += `<th class="${d.wknd ? "wknd" : ""}${pastKeys.has(d.key) ? " past" : ""}"><div class="day-dow">${d.dow}</div><div class="day-num">${d.d}<small>NOV</small></div></th>`;
+    for (const d of days) h += `<th class="day${d.wknd ? " wknd" : ""}${pastKeys.has(d.key) ? " past" : ""}"><div class="day-dow">${d.dow}</div><div class="day-num">${d.d}<small>NOV</small></div></th>`;
     h += "</tr></thead><tbody>";
     if (!films.length) {
       h += `<tr class="empty-row"><td colspan="${days.length + 1 + (past.length ? 1 : 0)}"><div class="empty-sticky">
@@ -861,7 +863,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
           const at = attendees(s).sort((a, b) => (a[1] === b[1] ? 0 : a[1] === "bought" ? -1 : 1));
           const dim = state.focus && !(s.attendees || {})[state.focus] ? " dim" : "";
           h += `<div class="screening${dim}">
-            <button type="button" class="s-head" data-screening="${esc(s.id)}" title="Screening details" aria-label="${esc(f.title)}, ${dayLabel(s.date)} at ${esc(s.time)}: details"><span class="s-time">${esc(s.time)}</span>${s.venue ? `<span class="s-venue">${esc(s.venue)}</span>` : ""}</button>
+            <button type="button" class="s-head" data-screening="${esc(s.id)}" title="Screening details" aria-label="${esc(f.title)}, ${dayLabel(s.date)} at ${esc(s.time)}: details"><span class="s-time">${esc(s.time)}</span>${s.venue ? `<span class="s-venue" title="${esc(s.venue)}">${esc(s.venue)}</span>` : ""}</button>
             ${at.length ? `<div class="s-tags">${at.map(([pid, v]) => tagHTML(state.people.get(pid), v, s.id)).join("")}</div>` : (canWrite === false ? '<div class="s-empty">Nobody yet</div>' : "")}
             ${canWrite !== false ? `<button type="button" class="s-add edit-only" data-addp="${esc(s.id)}">+ participant</button>` : ""}
           </div>`;
