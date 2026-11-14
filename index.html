@@ -636,14 +636,32 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     if (canWrite === false || !sid) return `<span class="tag ${status}" style="${pvars(p)}" title="${label}">${inner}</span>`;
     return `<button type="button" class="tag ${status}" style="${pvars(p)}" data-tag-s="${esc(sid)}" data-tag-p="${esc(p.id)}" title="${label}. Click to change">${inner}</button>`;
   }
+  // The festival day to sort by: today while it runs, the first day before it, null once it's over.
+  function sortDay() {
+    const now = new Date();
+    if (now < new Date(2026, 10, 12)) return DAYS[0];
+    return DAYS.find((x) => x.d === now.getDate() && now.getMonth() === 10 && now.getFullYear() === 2026) || null;
+  }
+  // Most people going today first; then by next screening from today on; films with nothing left last.
+  // After the festival, simply by first screening.
   function filmOrder() {
-    const first = new Map();
+    const day = sortDay(), from = day ? day.key : "";
+    const next = new Map(), today = new Map();
     for (const s of state.screenings.values()) {
-      const k = `${s.date} ${s.time}`;
-      if (!first.has(s.filmId) || k < first.get(s.filmId)) first.set(s.filmId, k);
+      if (s.date >= from) {
+        const k = `${s.date} ${s.time}`;
+        if (!next.has(s.filmId) || k < next.get(s.filmId)) next.set(s.filmId, k);
+      }
+      if (day && s.date === day.key) {
+        const set = today.get(s.filmId) || new Set();
+        for (const [pid] of attendees(s)) set.add(pid);
+        today.set(s.filmId, set);
+      }
     }
+    const n = (f) => (today.get(f.id) || new Set()).size;
     return [...state.films.values()].sort((a, b) => {
-      const fa = first.get(a.id) || "~", fb = first.get(b.id) || "~";
+      if (n(a) !== n(b)) return n(b) - n(a);
+      const fa = next.get(a.id) || "~", fb = next.get(b.id) || "~";
       return fa < fb ? -1 : fa > fb ? 1 : (a.title || "").localeCompare(b.title || "");
     });
   }
