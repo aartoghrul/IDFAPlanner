@@ -89,6 +89,7 @@ h1 .yr { color: var(--accent); }
 .btn.danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); }
 .btn.danger-solid { background: var(--danger); border-color: var(--danger); color: #fff; }
 .btn svg { width: 16px; height: 16px; flex: none; }
+.btn svg.i-film-add { width: 18px; height: 18px; }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* Toolbar */
@@ -395,7 +396,23 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
   body { padding-block: 14px 40px; }
   .wrap { gap: 12px; }
   .sub, .legend, .foot span { display: none; }
-  .toolbar { padding: 8px 10px; }
+  /* Header: eyebrow, title, then Highlight (unboxed) with round icon buttons on the same row */
+  .wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 10px; }
+  header { display: contents; }
+  header > div:first-child { grid-column: 1 / -1; order: 0; }
+  .toolbar { order: 1; align-self: start; min-height: 40px; }
+  .actions { order: 2; align-self: start; flex-wrap: nowrap; gap: 8px; }
+  .banner, .board, .foot { grid-column: 1 / -1; }
+  .banner { order: 3; } .board { order: 4; } .foot { order: 5; }
+  .eyebrow { justify-content: space-between; flex-wrap: nowrap; }
+  .not-phone { display: none; }
+  h1 { font-size: clamp(28px, 9vw, 40px); white-space: nowrap; }
+  .actions .btn { width: 40px; height: 40px; padding: 0; justify-content: center; }
+  .actions .btn svg { width: 18px; height: 18px; }
+  .actions .btn svg.i-film-add { width: 22px; height: 22px; }
+  .btn-label { display: none; }
+  .toolbar { background: none; border: 0; border-radius: 0; padding: 0; }
+  .crew-label { margin-right: 2px; }
 }
 .ro .edit-only { display: none !important; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -424,18 +441,22 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
 <div class="wrap" id="app" hidden>
   <header>
     <div>
-      <div class="eyebrow"><span>IDFA · Amsterdam · 12–22 Nov</span><span class="countdown" id="countdown"></span></div>
+      <div class="eyebrow"><span>IDFA<span class="not-phone"> · Amsterdam</span> · 12–22 Nov</span><span class="countdown" id="countdown"></span></div>
       <h1>Our IDFA <span class="yr">2026</span></h1>
       <p class="sub">Who's seeing what, and when. Add a screening you've spotted in the programme, then use + participant to say who's going. Tap a name to switch between thinking and bought.</p>
     </div>
     <div class="actions edit-only">
-      <button class="btn" id="btnPeople" type="button">
+      <button class="btn" id="btnPeople" type="button" aria-label="People">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="5.5" r="2.5"/><path d="M1.5 13.5c.6-2.4 2.4-3.6 4.5-3.6s3.9 1.2 4.5 3.6"/><path d="M11 3.5a2.3 2.3 0 0 1 0 4.4M12.2 10.2c1.2.5 2 1.6 2.3 3.3"/></svg>
-        People
+        <span class="btn-label">People</span>
       </button>
-      <button class="btn primary" id="btnAdd" type="button">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>
-        Add screening
+      <button class="btn primary" id="btnAdd" type="button" aria-label="Add screening">
+        <svg class="i-film-add" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="3" width="16" height="14" rx="2.2"/><path d="M5.8 3v14M14.2 3v14"/>
+          <g fill="currentColor" stroke="none"><rect x="3.1" y="5" width="1.6" height="1.6" rx=".4"/><rect x="3.1" y="9.2" width="1.6" height="1.6" rx=".4"/><rect x="3.1" y="13.4" width="1.6" height="1.6" rx=".4"/><rect x="15.3" y="5" width="1.6" height="1.6" rx=".4"/><rect x="15.3" y="9.2" width="1.6" height="1.6" rx=".4"/><rect x="15.3" y="13.4" width="1.6" height="1.6" rx=".4"/></g>
+          <path d="M10 7.4v5.2M7.4 10h5.2" stroke-width="2"/>
+        </svg>
+        <span class="btn-label">Add screening</span>
       </button>
     </div>
   </header>
