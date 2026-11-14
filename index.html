@@ -350,6 +350,53 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
   .film-title { font-size: 13.5px; }
   thead th, td.cell { min-width: 116px; }
 }
+/* Phone: one day at a time instead of the grid */
+.board.day-mode { overflow: visible; max-height: none; background: none; border: 0; border-radius: 0; box-shadow: none; }
+.m-days {
+  position: sticky; top: 0; z-index: 5; background: var(--bg);
+  margin: 0 -16px; padding: 8px 16px 10px; border-bottom: 1px solid var(--line);
+}
+.m-strip { display: grid; grid-template-columns: repeat(11, 1fr); gap: 2px; }
+.m-day {
+  display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 0 4px; min-width: 0;
+  border: 0; border-radius: 8px; background: none; color: var(--ink);
+}
+.m-day i { font-style: normal; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .02em; text-transform: uppercase; color: var(--ink-3); }
+.m-day b { font-family: var(--font-display); font-stretch: 110%; font-weight: 750; font-size: 16px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.m-day .m-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+.m-day .m-dot.none { background: transparent; }
+.m-day.past { opacity: .45; }
+.m-day.today b { color: var(--accent); }
+.m-day[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); opacity: 1; }
+.m-day[aria-pressed="true"] i, .m-day[aria-pressed="true"] b { color: inherit; }
+.m-day[aria-pressed="true"] .m-dot { background: var(--accent-ink); }
+.m-day[aria-pressed="true"] .m-dot.none { background: transparent; }
+.m-dayhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 8px; }
+.m-dayhead h2 { margin: 0; font-family: var(--font-display); font-stretch: 112%; font-weight: 750; font-size: 19px; }
+.m-dayhead span { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.m-list { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; min-height: 40vh; }
+.m-card {
+  display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+  transition: opacity .15s;
+}
+.m-card.dim { opacity: .28; }
+.m-card .s-head { padding: 0; }
+.m-card .s-time { font-size: 14px; }
+.m-card .s-venue { font-size: 12.5px; }
+.m-film { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 0; font-weight: 700; font-size: 16px; line-height: 1.25; overflow-wrap: anywhere; }
+.m-card .film-links { padding: 0; }
+.m-card .s-tags { align-items: center; }
+.m-card .tag { font-size: 13px; padding: 5px 8px; }
+.m-card .s-add { padding: 5px 9px; font-size: 12.5px; }
+.m-empty { text-align: center; color: var(--ink-2); padding: 32px 12px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.m-empty .big { font-family: var(--font-display); font-stretch: 112%; font-weight: 700; font-size: 18px; color: var(--ink); }
+@media (max-width: 600px) {
+  body { padding-block: 14px 40px; }
+  .wrap { gap: 12px; }
+  .sub, .legend, .foot span { display: none; }
+  .toolbar { padding: 8px 10px; }
+}
 .ro .edit-only { display: none !important; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -689,7 +736,69 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     return out;
   }
 
+  // ---------- render: day view (phones) ----------
+  const DOW_LONG = { Sun: "Sunday", Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday" };
+  const phone = window.matchMedia("(max-width: 600px)");
+  let mDay = (sortDay() || DAYS[0]).key;
+  function renderDayView() {
+    const board = $("board");
+    const today = sortDay(), pastKeys = new Set(pastDays().map((d) => d.key));
+    const has = new Set([...state.screenings.values()].map((s) => s.date));
+    const day = dayOf(mDay);
+    const here = [...state.screenings.values()].filter((s) => s.date === mDay && state.films.has(s.filmId))
+      .map((s) => ({ s, at: attendees(s) }))
+      .sort((a, b) => b.at.length - a.at.length || (a.s.time || "").localeCompare(b.s.time || ""));
+    const nPeople = new Set(here.flatMap((x) => x.at.map(([pid]) => pid))).size;
+    let h = `<nav class="m-days" aria-label="Pick a day"><div class="m-strip">`;
+    for (const d of DAYS) {
+      const cls = `m-day${pastKeys.has(d.key) ? " past" : ""}${today && today.key === d.key ? " today" : ""}`;
+      h += `<button type="button" class="${cls}" data-mday="${d.key}" aria-pressed="${d.key === mDay}" aria-label="${DOW_LONG[d.dow]} ${d.d} November"><i>${d.dow.slice(0, 2)}</i><b>${d.d}</b><span class="m-dot${has.has(d.key) ? "" : " none"}"></span></button>`;
+    }
+    h += `</div><div class="m-dayhead"><h2>${DOW_LONG[day.dow]} ${day.d} Nov</h2><span>${here.length} screening${here.length === 1 ? "" : "s"} · ${nPeople} going</span></div></nav>`;
+    h += '<div class="m-list" id="mList">';
+    if (!here.length) {
+      h += `<div class="m-empty"><div class="big">${state.ready ? "Nothing planned this day" : "Loading the plan…"}</div>
+        ${state.ready && canWrite !== false ? `<button class="btn primary edit-only" type="button" data-add-day="${mDay}">Add a screening on ${DOW_LONG[day.dow]}</button>` : ""}</div>`;
+    }
+    for (const { s, at } of here) {
+      const f = state.films.get(s.filmId);
+      at.sort((a, b) => (a[1] === b[1] ? 0 : a[1] === "bought" ? -1 : 1));
+      const dim = state.focus && !(s.attendees || {})[state.focus] ? " dim" : "";
+      h += `<article class="m-card${dim}">
+        <button type="button" class="s-head" data-screening="${esc(s.id)}" aria-label="${esc(f.title)}, ${dayLabel(s.date)} at ${esc(s.time)}: details"><span class="s-time">${esc(s.time)}</span>${s.venue ? `<span class="s-venue">${esc(s.venue)}</span>` : ""}</button>
+        <button type="button" class="m-film" data-film="${esc(f.id)}">${esc(f.title)}</button>
+        <div class="s-tags">${at.map(([pid, v]) => tagHTML(state.people.get(pid), v, s.id)).join("")}${canWrite !== false ? `<button type="button" class="s-add edit-only" data-addp="${esc(s.id)}">+ participant</button>` : (at.length ? "" : '<span class="s-empty">Nobody yet</span>')}</div>
+        ${filmLinks(f)}
+      </article>`;
+    }
+    h += "</div>";
+    board.classList.add("day-mode");
+    board.innerHTML = h;
+  }
+  function pickDay(key) {
+    if (!dayOf(key) || key === mDay) return;
+    mDay = key; renderBoard();
+    const board = $("board");
+    if (board.getBoundingClientRect().top < 0) window.scrollTo({ top: window.scrollY + board.getBoundingClientRect().top });
+  }
+  // Swipe left/right on the list for the next/previous day.
+  let swipe = null;
+  $("board").addEventListener("touchstart", (e) => {
+    if (!phone.matches || e.touches.length !== 1 || !e.target.closest("#mList")) { swipe = null; return; }
+    swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { passive: true });
+  $("board").addEventListener("touchend", (e) => {
+    if (!swipe) return;
+    const t = e.changedTouches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y; swipe = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const i = DAYS.findIndex((d) => d.key === mDay) + (dx < 0 ? 1 : -1);
+    if (DAYS[i]) pickDay(DAYS[i].key);
+  }, { passive: true });
+  phone.addEventListener("change", () => renderBoard());
+
   function renderBoard() {
+    if (phone.matches) return renderDayView();
+    $("board").classList.remove("day-mode");
     const films = filmOrder();
     const past = pastDays(), pastKeys = new Set(past.map((d) => d.key));
     const days = past.length && !pastOpen ? DAYS.filter((d) => !pastKeys.has(d.key)) : DAYS;
@@ -798,6 +907,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     state.screenings.set(sid, { id: sid, ...doc });
     write(`screenings/${sid}`, () => db.doc(`screenings/${sid}`).set(doc));
     $("dlgAdd").close();
+    mDay = date;   // on phones, show the day the new screening is on
     render();
     openScreening(sid);
   });
@@ -972,6 +1082,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
   // A phone keyboard opening for the search box resizes the window; don't close on that.
   window.addEventListener("resize", () => { if (!$("pop").contains(document.activeElement)) closePop(); });
   $("board").addEventListener("scroll", closePop, { passive: true });
+  window.addEventListener("scroll", () => { if (!$("pop").hidden && !$("pop").contains(document.activeElement)) closePop(); }, { passive: true });
   $("sEdit").addEventListener("submit", (e) => {
     e.preventDefault();
     const sid = openScreeningId, s = state.screenings.get(sid); if (!s || !db) return;
@@ -1148,7 +1259,10 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     if (t.closest("[data-close]")) { t.closest("dialog").close(); return; }
     const sc = t.closest("[data-screening]"); if (sc) { openScreening(sc.dataset.screening); return; }
     const fl = t.closest("[data-film]"); if (fl) { openFilm(fl.dataset.film); return; }
-    if (t.closest("[data-add]") || t.closest("#btnAdd")) { openAdd(); return; }
+    const md = t.closest("[data-mday]"); if (md) { pickDay(md.dataset.mday); return; }
+    const ad = t.closest("[data-add-day]"); if (ad) { openAdd(null, ad.dataset.addDay); return; }
+    if (t.closest("#btnAdd")) { openAdd(null, phone.matches ? mDay : undefined); return; }
+    if (t.closest("[data-add]")) { openAdd(); return; }
     if (t.closest("#btnPeople")) { openPeople(); return; }
     if (t.closest("#pastToggle")) { pastOpen = !pastOpen; renderBoard(); $("pastToggle").focus(); return; }
     if (t.closest("#crewToggle")) {
