@@ -121,6 +121,7 @@ h1 .yr { color: var(--accent); }
 .crew-toggle .pip + .pip { margin-left: -5px; }
 .crew-toggle svg { width: 12px; height: 12px; color: var(--ink-3); transition: transform .15s; }
 .crew-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.crew-toggle .ct-word { display: none; }
 .legend { display: flex; gap: 14px; align-items: center; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
 .legend .tag { pointer-events: none; }
 
@@ -396,23 +397,31 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
   body { padding-block: 14px 40px; }
   .wrap { gap: 12px; }
   .sub, .legend, .foot span { display: none; }
-  /* Header: eyebrow, title, then Highlight (unboxed) with round icon buttons on the same row */
-  .wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 10px; }
+  /* Header, two rows sharing the same edges:
+     title · day pill / Highlight · People + Add (all controls 40px tall) */
+  .wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px 10px; }
   header { display: contents; }
-  header > div:first-child { grid-column: 1 / -1; order: 0; }
-  .toolbar { order: 1; align-self: start; min-height: 40px; }
+  header > div:first-child { grid-column: 1 / -1; order: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .eyebrow { order: 1; flex: none; }
+  .eyebrow-text { display: none; }
+  .eyebrow .countdown { background: none; color: var(--ink-2); border: 1px solid var(--line-2); padding: 3px 9px; font-size: 11px; }
+  h1 { margin: 0; font-size: 26px; white-space: nowrap; }
+  .toolbar { order: 1; align-self: start; }
   .actions { order: 2; align-self: start; flex-wrap: nowrap; gap: 8px; }
   .banner, .board, .foot { grid-column: 1 / -1; }
   .banner { order: 3; } .board { order: 4; } .foot { order: 5; }
-  .eyebrow { justify-content: space-between; flex-wrap: nowrap; }
-  .not-phone { display: none; }
-  h1 { font-size: clamp(28px, 9vw, 40px); white-space: nowrap; }
+  .crew-label { display: none; }
+  .crew-toggle { height: 40px; padding: 0 12px 0 10px; font-size: 14px; }
+  .crew-toggle .ct-count { display: none; }
+  .crew-toggle .ct-word { display: inline; }
+  .crew-chip { height: 40px; padding: 0 12px 0 7px; font-size: 14px; }
+  .crew-chip .dot { width: 24px; height: 24px; font-size: 11px; }
+  .crew { gap: 8px; }
   .actions .btn { width: 40px; height: 40px; padding: 0; justify-content: center; }
   .actions .btn svg { width: 18px; height: 18px; }
   .actions .btn svg.i-film-add { width: 22px; height: 22px; }
   .btn-label { display: none; }
   .toolbar { background: none; border: 0; border-radius: 0; padding: 0; }
-  .crew-label { margin-right: 2px; }
 }
 .ro .edit-only { display: none !important; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -441,7 +450,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
 <div class="wrap" id="app" hidden>
   <header>
     <div>
-      <div class="eyebrow"><span>IDFA<span class="not-phone"> · Amsterdam</span> · 12–22 Nov</span><span class="countdown" id="countdown"></span></div>
+      <div class="eyebrow"><span class="eyebrow-text">IDFA · Amsterdam · 12–22 Nov</span><span class="countdown" id="countdown"></span></div>
       <h1>Our IDFA <span class="yr">2026</span></h1>
       <p class="sub">Who's seeing what, and when. Add a screening you've spotted in the programme, then use + participant to say who's going. Tap a name to switch between thinking and bought.</p>
     </div>
@@ -452,9 +461,9 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
       </button>
       <button class="btn primary" id="btnAdd" type="button" aria-label="Add screening">
         <svg class="i-film-add" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="2" y="3" width="16" height="14" rx="2.2"/><path d="M5.8 3v14M14.2 3v14"/>
+          <rect x="2" y="3" width="16" height="14" rx="2.2"/>
           <g fill="currentColor" stroke="none"><rect x="3.1" y="5" width="1.6" height="1.6" rx=".4"/><rect x="3.1" y="9.2" width="1.6" height="1.6" rx=".4"/><rect x="3.1" y="13.4" width="1.6" height="1.6" rx=".4"/><rect x="15.3" y="5" width="1.6" height="1.6" rx=".4"/><rect x="15.3" y="9.2" width="1.6" height="1.6" rx=".4"/><rect x="15.3" y="13.4" width="1.6" height="1.6" rx=".4"/></g>
-          <path d="M10 7.4v5.2M7.4 10h5.2" stroke-width="2"/>
+          <path d="M10 7.2v5.6M7.2 10h5.6" stroke-width="1.9"/>
         </svg>
         <span class="btn-label">Add screening</span>
       </button>
@@ -680,7 +689,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     if (!people.length) html += `<span style="font-size:13px;color:var(--ink-3)">${state.ready ? "Nobody yet. Add people with the People button." : "Loading…"}</span>`;
     else html += `<button type="button" class="crew-toggle" id="crewToggle" aria-expanded="${crewOpen}" title="${crewOpen ? "Hide the list" : "Pick someone to highlight"}">
         <span class="stack" aria-hidden="true">${people.slice(0, 5).map((p) => `<span class="pip" style="${pvars(p)}"></span>`).join("")}</span>
-        ${people.length} ${people.length === 1 ? "person" : "people"}${CHEVRON}</button>`;
+        <span class="ct-count">${people.length} ${people.length === 1 ? "person" : "people"}</span><span class="ct-word">Highlight</span>${CHEVRON}</button>`;
     for (const p of crewOpen ? people : people.filter((p) => p.id === state.focus)) {
       html += `<button type="button" class="crew-chip" data-person="${esc(p.id)}" aria-pressed="${state.focus === p.id}" style="${pvars(p)}" title="${state.focus === p.id ? "Stop highlighting" : `Highlight ${esc(p.name)}'s screenings`}">
         <span class="dot">${esc(initials(p.name))}</span>${esc(p.name)}</button>`;
