@@ -173,6 +173,19 @@ thead th.wknd { background: color-mix(in srgb, var(--weekend) 70%, var(--surface
 .film-links a:hover { text-decoration: underline; }
 td.cell { padding: 6px; min-width: 128px; position: relative; }
 td.cell.wknd { background: color-mix(in srgb, var(--weekend) 55%, transparent); }
+/* Past days: folded into a slim column during the festival, expandable */
+thead th.past-toggle, td.past-gap { min-width: 0; width: 34px; padding: 0; }
+td.past-gap { background: var(--surface-2); }
+.past-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; height: 100%; min-height: 56px;
+  border: 0; background: var(--surface-2); color: var(--ink-3); padding: 8px 0; border-radius: 0;
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+}
+.past-btn:hover { color: var(--accent); }
+.past-btn svg { width: 12px; height: 12px; flex: none; }
+.past-btn span { writing-mode: vertical-rl; transform: rotate(180deg); }
+thead th.past .day-num, thead th.past .day-dow { opacity: .55; }
+td.cell.past { background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
 .cell-stack { display: flex; flex-direction: column; gap: 6px; min-height: 64px; }
 .screening {
   display: flex; flex-direction: column; gap: 6px; text-align: left; width: 100%;
@@ -608,6 +621,15 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
   }
 
   // ---------- render: board ----------
+  // While the festival runs, days before today fold into one slim column; tap it to show them again.
+  // Not remembered between visits, so each visit starts on today.
+  let pastOpen = false;
+  function pastDays() {
+    const now = new Date(), y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+    if (y !== 2026 || m !== 10) return [];
+    if (d > DAYS[DAYS.length - 1].d) return [];   // after the festival: show everything
+    return DAYS.filter((x) => x.d < d);
+  }
   function tagHTML(p, status, sid) {
     const label = `${esc(p.name)} · ${status === "bought" ? "has a ticket" : "thinking about it"}`;
     const inner = `${status === "bought" ? TICKET : ""}<span>${esc(p.name)}</span>`;
@@ -651,11 +673,17 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
 
   function renderBoard() {
     const films = filmOrder();
+    const past = pastDays(), pastKeys = new Set(past.map((d) => d.key));
+    const days = past.length && !pastOpen ? DAYS.filter((d) => !pastKeys.has(d.key)) : DAYS;
+    const pastLabel = past.length === 1 ? `${past[0].d} Nov` : `${past[0]?.d}–${past[past.length - 1]?.d} Nov`;
     let h = '<table><thead><tr><th class="corner">Film</th>';
-    for (const d of DAYS) h += `<th class="${d.wknd ? "wknd" : ""}"><div class="day-dow">${d.dow}</div><div class="day-num">${d.d}<small>NOV</small></div></th>`;
+    if (past.length) h += `<th class="past-toggle"><button type="button" class="past-btn" id="pastToggle" aria-expanded="${pastOpen}" title="${pastOpen ? "Hide past days" : `Show past days (${pastLabel})`}">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${pastOpen ? "M7.5 3l-3 3 3 3" : "M4.5 3l3 3-3 3"}"/></svg>
+      <span>${pastOpen ? "Hide past" : pastLabel}</span></button></th>`;
+    for (const d of days) h += `<th class="${d.wknd ? "wknd" : ""}${pastKeys.has(d.key) ? " past" : ""}"><div class="day-dow">${d.dow}</div><div class="day-num">${d.d}<small>NOV</small></div></th>`;
     h += "</tr></thead><tbody>";
     if (!films.length) {
-      h += `<tr class="empty-row"><td colspan="${DAYS.length + 1}"><div class="empty-sticky">
+      h += `<tr class="empty-row"><td colspan="${days.length + 1 + (past.length ? 1 : 0)}"><div class="empty-sticky">
         <div class="big">${state.ready ? "No films on the plan yet" : "Loading the plan…"}</div>
         <div>Add a screening you've spotted in the IDFA programme, then tag who's going.</div>
         ${canWrite !== false ? '<button class="btn primary edit-only" type="button" data-add>Add the first screening</button>' : ""}
@@ -668,9 +696,10 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
       h += `<tr><th class="film${links ? " has-links" : ""}" scope="row"><button type="button" data-film="${esc(f.id)}" title="Edit film">
         <div class="film-title">${esc(f.title)}</div>
         <div class="film-meta">${ss.length} screening${ss.length === 1 ? "" : "s"} · ${nGoing} going</div></button>${links}</th>`;
-      for (const d of DAYS) {
+      if (past.length) h += '<td class="past-gap"></td>';
+      for (const d of days) {
         const here = ss.filter((s) => s.date === d.key).sort((a, b) => (a.time || "").localeCompare(b.time || ""));
-        h += `<td class="cell ${d.wknd ? "wknd" : ""}"><div class="cell-stack ${here.length ? "has" : ""}">`;
+        h += `<td class="cell ${d.wknd ? "wknd" : ""}${pastKeys.has(d.key) ? " past" : ""}"><div class="cell-stack ${here.length ? "has" : ""}">`;
         for (const s of here) {
           const at = attendees(s).sort((a, b) => (a[1] === b[1] ? 0 : a[1] === "bought" ? -1 : 1));
           const dim = state.focus && !(s.attendees || {})[state.focus] ? " dim" : "";
@@ -1103,6 +1132,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color:
     const fl = t.closest("[data-film]"); if (fl) { openFilm(fl.dataset.film); return; }
     if (t.closest("[data-add]") || t.closest("#btnAdd")) { openAdd(); return; }
     if (t.closest("#btnPeople")) { openPeople(); return; }
+    if (t.closest("#pastToggle")) { pastOpen = !pastOpen; renderBoard(); $("pastToggle").focus(); return; }
     if (t.closest("#crewToggle")) {
       crewOpen = !crewOpen;
       try { localStorage.setItem("crewOpen", crewOpen ? "1" : "0"); } catch {}
